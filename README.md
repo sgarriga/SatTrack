@@ -1,5 +1,7 @@
 # SatTrack
 
+While raspberry-noaa(-v2) was working great for me I wanted to streamline things and take a different approach to configuration such that I could capture any VHF or UHF satellite transmissions my RTL-SDR dongle and antenna(s) could handle, and decode them as weather images, SSTV, CW, etc.
+
 Standing on the shoulders of giants, this project is highly indebted to the following...
 
 * SQLite3 - [SQLite](https://www.sqlite.org/index.html)
