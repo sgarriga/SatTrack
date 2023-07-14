@@ -30,3 +30,10 @@
 *.exe
 *.out
 *.app
+
+# Work Files
+image/*
+wavs/*
+*.log
+full_norad.tle
+sat-track.db
