@@ -52,18 +52,8 @@ sqlite3 ${db} "${sql}"
 ${cmd_path}/capture_audio.sh ${wav_dir}/${outfile}.wav ${freq} ${duration} ${gain} ${freq_offset} ${bias_tee} ${dev_id} ${sig_type}
 
 case ${sig_type} in
-APT)
-    ${cmd_path}/decode_APT.sh ${wav_dir}/${outfile}.wav "${1}" ${2} ${direction}
-    ;;
-
-LRPT)
-    ${cmd_path}/decode_LRPT.sh ${wav_dir}/${outfile}.wav "${1}" ${2} ${direction}
-    ;;
-
-SSTV)
-    ;;
-
-CW)
+APT|LRPT|SSTV|CW)
+    ${cmd_path}/decode_${sig_type}.sh ${wav_dir}/${outfile}.wav "${1}" ${2} ${direction}
     ;;
 
 *)

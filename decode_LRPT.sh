@@ -6,6 +6,7 @@
 #   2. Satellite Name
 #   3. Start (Epoch Time)
 #   4. Direction N|S
+
 echo "$(date +"%x %X") : Start $0 $1 \"$2\" $3 $4"
 
 cmd_path=$(readlink -f ${0//decode_LRPT.sh/})
