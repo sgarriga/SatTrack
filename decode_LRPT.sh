@@ -20,7 +20,7 @@ bmp=${img_dir}/${root_name}.bmp
 img=${img_dir}/${root_name}.png
 
 # Extract ymbols to a .qpsk file
-meteor_demod -B -o "${qpsk}" "${1}"
+meteor_demod -q -B -o "${qpsk}" "${1}"
 if [ $? -eq 0 ]; then
   echo "$(date +"%x %X") : Error generating QPSK"
 fi

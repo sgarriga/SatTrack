@@ -27,13 +27,12 @@ img=${img_dir}/${root_name}.png
 err=${img_dir}/${root_name}.err
 wxtoimg "${ns}" -o -C "${comment}" -t n -i PNG $1 ${img} 2>&1 | tee "${err}"
 if grep -q "wxtoimg: warning: couldn.t find telemetry data" "${err}"; then
-  rm -f "${img}" 
-  # rm -f "${err}" 
+  rm -f "${img}" "${err}" 
   echo "$(date +"%x %X") : No telemetry data detected"
   echo "$(date +"%x %X") : End $0"
   exit
 fi
-# rm -f "${err}" 
+rm -f "${err}" 
 
 echo "$(date +"%x %X") : Create overlay map"
 # Create overlay
