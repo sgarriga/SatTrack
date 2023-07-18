@@ -9,7 +9,7 @@
 #include "glob.hpp"
 
 static char *db = nullptr;
-static std::string image_dir = "../image/";
+static std::string image_dir = "./image/";
 
 std::string make_heading() { return ""; }
 template<typename T, typename ... Args>
@@ -169,7 +169,7 @@ int main(int argc, char *argv[])
 
 
   httplib::Server svr;
-  auto ret = svr.set_mount_point("/", "../www"); // everything in here is
+  auto ret = svr.set_mount_point("/", "./www"); // everything in here is
                                                  // served by default
   if (!ret) {
     // The specified base directory doesn't exist...

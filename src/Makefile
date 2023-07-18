@@ -10,7 +10,7 @@ all: ${TARGET}
 sat-track-svr: sat-track-svr.cpp handle.hpp sqlite3++.hpp glob.hpp
 	@echo $@ cares about $<
 	${CXX} ${CXXFLAGS} ${INCL} $< -o $@ ${LIBS}
-        cp $@ ../
+	cp $@ ../
 
 .PHONY: clean
 clean:

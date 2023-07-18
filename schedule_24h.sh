@@ -74,10 +74,8 @@ done < ${sat_list}
 rm -f ${sat_tle}
 
 echo "$(date +"%x %X") : Resolve conflicts"
-# Resolve any overlapping passes - TO DO
-conflicts=conflicts.txt
-
-sqlite3 -separator , ${db} "SELECT t1.sat_name, t1.pass_start, t1.pass_end, t2.sat_name, t2.pass_start, t2.pass_end FROM transits t1, transits t2 WHERE t2.device == t1.device AND t2.sat_name != t1.sat_name AND t2.pass_start >= t1.pass_start AND t2.pass_start <= t1.pass_end;" > ${conflicts}
+conflicts=${cmd_path}/conflicts.txt
+${cmd_path}/deconflict.sh
 if [ -s ${conflicts} ]; then
     echo "$(date +"%x %X") : Need to resolve conflicts!"
     exit
