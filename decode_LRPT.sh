@@ -15,12 +15,12 @@ img_dir=${cmd_path}/image
 echo "$(date +"%x %X") : Create base image"
 
 root_name=`echo ${1} | sed 's/.*\///' | sed 's/\.wav//'`
-qpsk=${img_dir}/${root_name}.qpsk
+qpsk=${img_dir}/work/${root_name}.qpsk
 bmp=${img_dir}/${root_name}.bmp
 img=${img_dir}/${root_name}.png
 
 # Extract ymbols to a .qpsk file
-meteor_demod -q -B -o "${qpsk}" "${1}"
+meteor_demod --quiet --batch --output "${qpsk}" "${1}"
 if [ $? -eq 0 ]; then
   echo "$(date +"%x %X") : Error generating QPSK"
 fi

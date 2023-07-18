@@ -61,5 +61,8 @@ done
 
 # Maybe create thumbnails?
 
+# Clean up the overlay
+rm -f "${overlay}"
+
 echo "$(date +"%x %X") : End $0"
 

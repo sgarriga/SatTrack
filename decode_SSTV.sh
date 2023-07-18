@@ -22,6 +22,6 @@ python3 "$HOME/pd120_decoder/pd120_decoder/demod.py" "${1}" "${png}"
 
 echo "$(date +"%x %X") : Pass 2 - sstv"
 png=${img_dir}/${root_name}.2.png
-sstv -d "${1}" "${png}"
+sstv -d "${1}" -o "${png}"
 
 echo "$(date +"%x %X") : End $0"

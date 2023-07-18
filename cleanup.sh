@@ -27,7 +27,7 @@ fi
 
 # Remove old images
 if [ -d ${cmd_path}/image ]; then
-  find ${cmd_path}/image -maxdepth 1 -mtime +${days} -type f \( -name "*.jpg" -o -name "*.bmp" -o -name "*.qpsk" -o -name "*.png" \) -exec rm -f {} \;
+  find ${cmd_path}/image -maxdepth 2 -mtime +${days} -type f \( -name "*.jpg" -o -name "*.bmp" -o -name "*.qpsk" -o -name "*.png" -o -name "*.txt" \) -exec rm -f {} \;
 fi
 
 echo "$(date +"%x %X") : Done $0"

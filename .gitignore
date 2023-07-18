@@ -37,3 +37,6 @@ wavs/*
 *.log
 full_norad.tle
 sat-track.db
+sat-track-svr
+src/sat-track-svr
+

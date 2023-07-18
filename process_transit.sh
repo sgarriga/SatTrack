@@ -27,7 +27,7 @@ fi
 IFS=, read -r sat_name pass_start pass_end max_elev pass_start_azimuth direction azimuth_at_max device sig_type status <<< "${pass_row}"
 unset IFS
 
-timestamp=$(printf '%(%Y%m%d%H%M%S)T' $pass_start)
+timestamp=$(TZ=UTC printf '%(%Y%m%d%H%M%S)T' $pass_start)
 outfile=$(echo ${sat_name/ /_}-${timestamp} | tr -d "()")
 duration=$(($pass_end - $pass_start))
 
