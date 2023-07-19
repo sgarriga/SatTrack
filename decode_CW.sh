@@ -18,7 +18,7 @@ root_name=`echo ${1} | sed 's/.*\///' | sed 's/\.wav//'`
 txt=${img_dir}/work/${root_name}.txt
 png=${img_dir}/${root_name}.png
 
-morse2ascii "${1}" > "${txt}"
+morse2ascii "${1}" | fold -w132 > "${txt}"
 
 if [ -s "${txt}" ]; then
   convert -size 1000x2000 xc:white -font "FreeMono" -pointsize 12 -fill black \
