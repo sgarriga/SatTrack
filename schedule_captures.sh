@@ -48,7 +48,9 @@ fi
 ## drop every predicted point below our minimum elevation and
 ## determine start & end of passes (and some other info)
 transits=/tmp/transits.txt
-predict -t $tle_file -f "${sat_name}" "${start_s}" "${end_s}" | awk -v min="${sat_min}" '{if($5>=min){print $0}}' | awk -f  ${cmd_path}/predicts2pass.awk > ${transits}
+predict -t $tle_file -f "${sat_name}" "${start_s}" "${end_s}" | \
+  awk -v min="${sat_min}" '{if($5>=min){print $0}}' | \
+  awk -f  ${cmd_path}/predicts2pass.awk > ${transits}
 if [ ! -s ${transits} ]; then
   echo "$(date +"%x %X") : No predicted passes for ${sat_name} with elevation over ${sat_min} degrees"
   exit
