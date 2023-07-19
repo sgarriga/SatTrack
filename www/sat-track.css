@@ -2,6 +2,11 @@ table, tr, th, td {
   border: 1px solid;
   text-align: center;
 }
+
+th, td {
+    padding: 15px;
+}
+
 table {
     border-collapse: collapse;
 }

@@ -10,6 +10,7 @@
 
 static char *db = nullptr;
 static std::string image_dir = "./image/";
+static std::string tz = "UTC";
 
 std::string make_heading() { return ""; }
 template<typename T, typename ... Args>
@@ -38,25 +39,6 @@ static std::string make_header_row(T first, Args ... args) {
     return std::string("<tr>") + make_heading(first, args ...) + "</tr>\n";
 }
 
-static std::string head() {
-    return R"(
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<link rel="stylesheet" href="sat-track.css">
-<title>SatCom</title>
-</head>
-<body>)";
-}
-
-static std::string tail() {
-    return R"(
-</body>
-</html>)";
-}
-
-
 std::vector <std::string>file_list(std::string safeSatName, long passStart) {
     std::time_t t = static_cast<std::time_t>(passStart);
     char buff[64];
@@ -66,6 +48,14 @@ std::vector <std::string>file_list(std::string safeSatName, long passStart) {
     return files;
 }
 
+const std::string getTZ() {
+    time_t     now = time(0);
+    struct tm  tstruct;
+    char       buf[80];
+    tstruct = *localtime(&now);
+    strftime(buf, sizeof(buf), "UTC%z", &tstruct);
+    return buf;
+}
 std::string files(std::string safeSatName, long passStart)
 {
     std::string table = "";
@@ -101,7 +91,7 @@ std::string passes()
         Statement statement(connection, "select sat_name, date(pass_start, 'unixepoch', 'localtime'), time(pass_start, 'unixepoch', 'localtime'), time(pass_end, 'unixepoch', 'localtime'), max_elev, direction, azimuth_at_max, device, signal_type, status, pass_start from transits order by pass_start desc");
 
         table += "<table>\n";
-        table += make_header_row("Satellite", "Pass Start", "Pass End", "Max. Elevation" , "Azimuth", "Direction", "Images Extracted");
+        table += make_header_row("Satellite Name", "Pass Start<br>(" +tz + ")", "Pass End<br>(" + tz + ")", "Max.<br>Elevation" , /* "Azimuth", "Direction", */ "Image<br>Count");
         std::string date = "";
         for (Row pass : statement) {
             std::string pDate = pass.GetString(1); // date-start
@@ -113,11 +103,11 @@ std::string passes()
             std::string safeSatName = make_safe(pass.GetString(0));
             auto files = file_list(safeSatName, std::atol(pass.GetString(10)));
 
-            std::string cnt;
+            std::string cnt = "";
             if (files.size()) {
                 cnt = "<a href=\"files?sat-name=" + safeSatName + "&start=" + pass.GetString(10) + "\">" + std::to_string(files.size()) + "</a>";
             }
-            else {
+            else if (std::string(pass.GetString(9)) == "complete") {
                 cnt = "0";
             }
 
@@ -125,8 +115,8 @@ std::string passes()
                      pass.GetString(2),          // time-start
                      pass.GetString(3),          // time-end
                      elev,                       // max. elev.
-                     pass.GetString(6),          // azimuth @ max.
-                     pass.GetString(5),          // dir
+                     // pass.GetString(6),          // azimuth @ max.
+                     // pass.GetString(5),          // dir
                      cnt);                       // extracted file count
         }
         table += "</table>\n";
@@ -135,6 +125,19 @@ std::string passes()
         printf("%s (%d)\n", e.Message.c_str(), e.Result);
     }
     return table;
+}
+
+std::string getTemplate(const char *name)
+{
+    std::ifstream ifs(name, std::ios::in | std::ios::binary | std::ios::ate);
+
+    std::ifstream::pos_type size = ifs.tellg();
+    ifs.seekg(0, std::ios::beg);
+
+    std::vector<char> bytes(size);
+    ifs.read(bytes.data(), size);
+
+    return std::string(bytes.data(), size);
 }
 
 int main(int argc, char *argv[])
@@ -167,7 +170,7 @@ int main(int argc, char *argv[])
     }
   }
 
-
+  tz = getTZ();
   httplib::Server svr;
   auto ret = svr.set_mount_point("/", "./www"); // everything in here is
                                                  // served by default
@@ -176,16 +179,16 @@ int main(int argc, char *argv[])
   }
 
   svr.Get("/", [](const httplib::Request& /* req */, httplib::Response& res) {
-    std::string body = head();
-    body += passes();
-    body += tail();
+    std::string body = getTemplate("./www/html_template");
+    body.replace(body.find("{{}}"), 4, passes());
     res.set_content(body.c_str(), "text/html");
   });
 
   svr.Get("/files", [](const httplib::Request& req, httplib::Response& res) {
-    std::string body = head();
-    body += files(req.get_param_value("sat-name"), std::atol(req.get_param_value("start").c_str()));
-    body += tail();
+    std::string body = getTemplate("./www/html_template");
+    std::string insert = files(req.get_param_value("sat-name"), 
+                               std::atol(req.get_param_value("start").c_str()));
+    body.replace(body.find("{{}}"), 4, insert);
     res.set_content(body.c_str(), "text/html");
   });
 
