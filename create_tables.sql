@@ -6,7 +6,6 @@ CREATE TABLE IF NOT EXISTS satellites(
   signal_type TEXT,
   device INT DEFAULT 0,
   bias_tee TEXT DEFAULT "OFF",
-  sun_min_elev INT NOT NULL,
   sat_min_elev INT NOT NULL);
 CREATE TABLE IF NOT EXISTS transits(
   sat_name TEXT NOT NULL, 
