@@ -7,10 +7,9 @@
 #   2. Frequency MHz
 #   3. Duration Seconds
 #   4. Gain
-#   5. Frequency Offset
-#   6. Bias Tee setting usb|gpio0|off
-#   7. RTL-SDR dongle device ID
-#   8. Expected data format
+#   5. Bias Tee setting usb|gpio0|off
+#   6. RTL-SDR dongle device ID
+#   7. Expected data format
 #
 
 echo "$(date +"%x %X") : Start $0 $1 $2 $3 $4 $5 $6 $7 $8"
@@ -21,10 +20,9 @@ outfile=$1
 freq=$2
 duration=$3
 gain=$4
-freq_offset=$5
-bias_tee=$6
-dev_id=$7
-format=$8
+bias_tee=$5
+dev_id=$6
+format=$7
 
 if [ ${gain} == 0 ]; then
     gain=""

@@ -14,6 +14,7 @@ db=${cmd_path}/sat-track.db
 
 # Get update NORAD data, if we need it
 norad_data=${cmd_path}/full_norad.tle
+norad_names=${cmd_path}/norad_names.txt
 ## force a new download if our data is > 12 hours old
 if [ -e ${norad_data} ]; then
   echo "$(date +"%x %X") : NORAD file exists"
@@ -33,6 +34,19 @@ if [ ! -e ${norad_data} ]; then
   wget -q "http://www.celestrak.org/NORAD/elements/visible.txt" --no-check-certificate -O - >> "${norad_data}" 
   wget -q "http://www.celestrak.org/NORAD/elements/amateur.txt" --no-check-certificate -O - >> "${norad_data}" 
   echo "$(date +"%x %X") : NORAD elements aquired"
+
+  if [ ! -e ${norad_names} ]; then
+    touch "${norad_names}"
+  fi
+  awk '{ print $0; getline; getline; }' "${norad_data}" | tr -d '' > "${norad_names}.tmp"
+  if ! cmp -s "${norad_names}" "${norad_names}.tmp"; then
+    mv "${norad_names}.tmp" "${norad_names}"
+    cat ${cmd_path}/load_norad_names.sql | sed s?CMD_PATH?${cmd_path}? | sqlite3 ${db}
+  else
+    rm -f "${norad_names}.tmp"
+  fi
+
+  echo "$(date +"%x %X") : NORAD elements ready"
 fi
 
 sat_list=/tmp/satellites.txt

@@ -6,6 +6,10 @@
 <title>SatTrack</title>
 </head>
 <body>
+<div class="topnav" id="topnav">
+<a href="./passes"><img class="topnav" src="./schedule_lg_icon.png" alt="schedule"></a>
+<a href="./satellites"><img class="topnav" src="./satellite_lg_icon.png" alt="satellites"></a>
+</div>
 {{}}
 </body>
 </html>

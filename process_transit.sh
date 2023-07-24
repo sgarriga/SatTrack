@@ -42,14 +42,14 @@ if [ -z "${sat_row}" ]; then
 fi
 
 # split the variable 
-IFS=, read -r sat_name freq freq_offset gain sig_type dev_id bias_tee sun_min sat_min <<< "${sat_row}"
+IFS=, read -r sat_name freq gain sig_type dev_id bias_tee sun_min sat_min <<< "${sat_row}"
 unset IFS
 
 # mark pass active
 sql="UPDATE transits SET status=\"active\" WHERE sat_name=\"${1}\" AND pass_start=${2} AND status=\"scheduled\";"
 sqlite3 ${db} "${sql}"
 
-${cmd_path}/capture_audio.sh ${wav_dir}/${outfile}.wav ${freq} ${duration} ${gain} ${freq_offset} ${bias_tee} ${dev_id} ${sig_type}
+${cmd_path}/capture_audio.sh ${wav_dir}/${outfile}.wav ${freq} ${duration} ${gain} ${bias_tee} ${dev_id} ${sig_type}
 
 case ${sig_type} in
 APT|LRPT|SSTV|CW)

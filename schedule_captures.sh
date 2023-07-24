@@ -27,7 +27,7 @@ echo "$(date +"%x %X") : Start $0 $1 $2 $3 $4 $4"
 # Get full satellite details from DB
 ## set -f/+f avoids * expansion
 set -f
-IFS=, read -r sat_name freq freq_offset gain sig_type dev_id bias_tee sat_min <<< $(sqlite3 -separator , ${db} "select * from satellites where name=\"${sat_name}\" AND signal_type=\"${sig_type}\";")
+IFS=, read -r sat_name freq gain sig_type dev_id bias_tee sat_min <<< $(sqlite3 -separator , ${db} "select * from satellites where name=\"${sat_name}\" AND signal_type=\"${sig_type}\";")
 unset IFS
 set +f
 

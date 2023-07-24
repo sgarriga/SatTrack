@@ -1,7 +1,6 @@
 CREATE TABLE IF NOT EXISTS satellites(
   name TEXT NOT NULL,
   freq_Mhz REAL NOT NULL,
-  offset INT NOT NULL,
   gain INT NOT NULL,
   signal_type TEXT,
   device INT DEFAULT 0,

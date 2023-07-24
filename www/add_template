@@ -1,0 +1,64 @@
+ <form action="/sat_save" method="post" id="add_form">
+  <table class="satform">
+  <tr class="satform">
+  <td colspan="3" class="satform">
+  <label for="norad_row">Satellite Name:</label>
+  <select name="norad_row" id="norad_row" form="add_form">
+    <option value="">--Please select--</option>
+    {{}}
+  </select><br>
+  <small>(NORAD element)</small>
+  <br>
+  </td>
+  </tr>
+  <tr class="satform">
+  <td class="satform">
+  <label for="freq">Frequency (MHz):</label><br>
+  <input type="number" id="freq" name="freq" value="137.9125" step="0.0001" style="width: 8em;">
+  </td>
+  <td class="satform">
+  <label for="gain">Gain:</label><br>
+  <input type="number" id="gain" name="gain" value="30" style="width: 3em;"><br>
+  <small>0 = Automatic</small>
+  </td>
+  <td class="satform">
+  <label for="elev">Minimum Elevation (&deg;):</label><br>
+  <input type="number" id="elev" name="elev" min="0" max="90" value="30" step="5" style="width: 3em;"><br>
+  <small>&deg; above horizon:</small>
+  </td>
+  </tr>
+
+  <tr class="satform">
+  <td class="satform">
+  <fieldset>
+    <legend>Signal Type</legend>
+    <label><input type="radio" name="signal" value="APT" />APT</label><br>
+    <label><input type="radio" name="signal" value="CW" />CW</label><br>
+    <label><input type="radio" name="signal" value="LRPT" />LRPT</label><br>
+    <label><input type="radio" name="signal" value="SSTV" />SSTV</label><br>
+    <label><input type="radio" name="signal" value="VOX" checked />VOX</label> 
+  </fieldset>
+  </td>
+  <td class="satform">
+  <fieldset>
+    <legend>RTL-SDR Device ID</legend>
+    <label><input type="radio" name="dev" value="0" checked />0</label><br>
+    <label><input type="radio" name="dev" value="1" />1</label> 
+  </fieldset>
+  </td>
+  <td class="satform">
+  <fieldset>
+    <legend>Bias Tee</legend>
+    <label><input type="radio" name="biast" value="OFF" checked />Off</label><br>
+    <label><input type="radio" name="biast" value="GPIO1" />GPIO</label><br>
+    <label><input type="radio" name="biast" value="USB" />USB</label> 
+  </fieldset>
+  </td>
+  </tr>
+  <tr class="satform">
+  <td colspan="3" class="satform" style="text-align: right;">
+  <input type="submit" value="Save" />
+  </td>
+  </tr>
+  </table>
+</form> 

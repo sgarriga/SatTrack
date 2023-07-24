@@ -39,4 +39,4 @@ full_norad.tle
 sat-track.db
 sat-track-svr
 src/sat-track-svr
-
+norad_names.txt
