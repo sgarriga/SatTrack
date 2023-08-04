@@ -11,7 +11,7 @@
 echo "$(date +"%x %X") : Start $0"
 cmd_path=$(readlink -f ${0//cleanup.sh/})
 db=${cmd_path}/sat-track.db
-days=15
+days=7
 
 
 echo "$(date +"%x %X") : Cleaning passes over ${days} days old"
