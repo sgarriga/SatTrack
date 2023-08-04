@@ -11,47 +11,49 @@
 
 static char *db = nullptr;
 static std::string image_dir = "./image/";
-static std::string tz = "UTC";
+static std::string utc_delta_s = "UTC";
 
+// a set of routines to build an HTML table with an arbitrary number of columns
 std::string make_heading() { return ""; }
 template<typename T, typename ... Args>
 static std::string make_heading(T first, Args ... args) {
     return std::string("<th>") + first + "</th>" + make_heading(args ...);
 }
-
+//
 static std::string make_item() { return ""; }
 template<typename T, typename ... Args>
 static std::string make_item(T first, Args ... args) {
     return std::string("<td>") + first + "</td>" + make_item(args ...);
 }
-
-//static void make_row() { }
+//
 template<typename T, typename ... Args>
 static std::string make_row(T first, Args ... args) {
     return std::string("<tr>") + make_item(first, args ...) + "</tr>\n";
 }
-
-static std::string make_date_row(std::string date) {
-    return std::string("<tr><td class=\"date\" colspan=\"7\">") + date + "</td></tr>\n";
-}
-
+//
 template<typename T, typename ... Args>
 static std::string make_header_row(T first, Args ... args) {
     return std::string("<tr>") + make_heading(first, args ...) + "</tr>\n";
 }
+//
+// and a special case...
+static std::string make_date_row(std::string date) {
+    return std::string("<tr><td class=\"date\" colspan=\"7\">") + date + "</td></tr>\n";
+}
 
+// read a 'template' file into a string
+// - this will generally have one or more {{}} or {{vvv}} strings embedded
+//   to be replaced
 std::string getTemplate(const char *name) {
     std::ifstream ifs(name, std::ios::in | std::ios::binary | std::ios::ate);
-
     std::ifstream::pos_type size = ifs.tellg();
     ifs.seekg(0, std::ios::beg);
-
     std::vector<char> bytes(size);
     ifs.read(bytes.data(), size);
-
     return std::string(bytes.data(), size);
 }
 
+// get a vector list of files associated with a satellite pass
 std::vector <std::string>file_list(std::string safeSatName, long passStart) {
     std::time_t t = static_cast<std::time_t>(passStart);
     char buff[64];
@@ -61,7 +63,8 @@ std::vector <std::string>file_list(std::string safeSatName, long passStart) {
     return files;
 }
 
-const std::string getTZ() {
+// what is our UTC delta?
+const std::string utc_delta() {
     time_t     now = time(0);
     struct tm  tstruct;
     char       buf[80];
@@ -70,7 +73,8 @@ const std::string getTZ() {
     return buf;
 }
 
-std::string edt_del_link(std::string sat_id) {
+// generate the 'edit' and 'delete' links for a satellite
+std::string sat_updt_links(std::string sat_id) {
     std::string ret = "";
     ret += "<a href=\"sat_edit?sat_row=" + sat_id + "\">";
     ret += "<img class=\"icon\" src=\"./edit-icon.png\" alt=\"edit\">";
@@ -81,6 +85,7 @@ std::string edt_del_link(std::string sat_id) {
     return ret;
 }
 
+// display the satellites we are tracking
 std::string satellites() {
     std::string table = "";
     try {
@@ -97,7 +102,7 @@ std::string satellites() {
                               sat.GetString(5),
                               sat.GetString(6),
                               sat.GetString(7),
-                              edt_del_link(sat.GetString(0)));
+                              sat_updt_links(sat.GetString(0)));
         }
         table += make_row("",
                           "",
@@ -115,11 +120,24 @@ std::string satellites() {
     return table;
 }
 
-void sat_del(std::string row_id) {
+// delete a tracked satellite entry (by row id)
+void sat_del(std::string sat_row_id) {
+    try {
+        Connection connection = Connection(db);
+        std::string del = std::string("DELETE FROM satellites WHERE rowid=") + sat_row_id;
+        Execute(connection, del.c_str());
+    }
+    catch (Exception const & e) {
+        printf("%s (%d)\n", e.Message.c_str(), e.Result);
+    }
+}
+
+// delete a satellite pass entry (by row id) - if it's nod complete or in-progress
+void pass_del(std::string pass_row_id) {
     try {
         Connection connection = Connection(db);
 
-        std::string del = std::string("DELETE FROM satellites WHERE rowid=") + row_id;
+        std::string del = std::string("DELETE FROM passes WHERE rowid=") + pass_row_id + " AND status!=\"complete\" AND status!=\"active\";";
         Execute(connection, del.c_str());
         
     }
@@ -128,10 +146,13 @@ void sat_del(std::string row_id) {
     }
 }
 
+// save a newly created, or edited tracked satellite entry
 void sat_save(httplib::Params params) {
     try {
         Connection connection = Connection(db);
         std::string sat_name = "";
+
+        // saving an 'add' we have a norad_names row_id, not a name
         if (params.find("norad_row") != params.end()) {
           std::string name_query = "SELECT name FROM norad_names WHERE rowid=" + params.find("norad_row")->second;
           for (Row row : Statement(connection, name_query.c_str())) {
@@ -139,7 +160,7 @@ void sat_save(httplib::Params params) {
             if (sat_name.size()) {
               sat_name = sat_name.substr(0, sat_name.find_last_not_of(" ")+1);
             }
-            break;
+            break; // only 1 match expected
           }
         }
         else {
@@ -156,6 +177,7 @@ void sat_save(httplib::Params params) {
                            + params.find("elev")->second + ");";
         Execute(connection, insert.c_str());
 
+        // if this update was from an 'edit' then purge the old row
         if (params.find("del_sat_row") != params.end()) {
             sat_del(params.find("del_sat_row")->second);
         }
@@ -166,6 +188,7 @@ void sat_save(httplib::Params params) {
     }
 }
 
+// present the 'edit' for for a tracked satellite
 std::string sat_edit(std::string row_id) {
     std::string body = "";
     try {
@@ -187,7 +210,7 @@ std::string sat_edit(std::string row_id) {
             tgt = std::string("\"biast\" value=\"") + sat.GetString(5) + "\"";
             body.replace(body.find(tgt), tgt.size(), tgt + " checked");
             body.replace(body.find("{{ELEV}}"), 8, sat.GetString(6));
-            break;
+            break; // only 1 match expected
         }
     }
     catch (Exception const & e) {
@@ -196,6 +219,7 @@ std::string sat_edit(std::string row_id) {
     return body;
 }
 
+// create the satellite names dropdown for the 'add' form
 std::string satellite_opts() {
     std::string opts = "";
     try {
@@ -212,6 +236,7 @@ std::string satellite_opts() {
     return opts;
 }
 
+// create a table containing all the decoded images for a satellite pass
 std::string files(std::string safeSatName, long passStart) {
     std::string table = "";
     try {
@@ -229,6 +254,7 @@ std::string files(std::string safeSatName, long passStart) {
     return table;
 }
 
+// convert the satellite name in DB to the value used in file names
 std::string make_safe(std::string in) {
     std::string out = in;
     std::replace(out.begin(), out.end(), ' ', '_');
@@ -237,15 +263,16 @@ std::string make_safe(std::string in) {
     return out;
 }
 
+// display the sattelite pass schedule
 std::string passes() {
     std::string table = "";
     try {
         Connection connection = Connection(db);
 
-        Statement statement(connection, "SELECT sat_name, DATE(pass_start, 'unixepoch', 'localtime'), TIME(pass_start, 'unixepoch', 'localtime'), TIME(pass_end, 'unixepoch', 'localtime'), max_elev, direction, azimuth_at_max, device, signal_type, status, pass_start FROM transits ORDER BY pass_start DESC");
+        Statement statement(connection, "SELECT sat_name, DATE(pass_start, 'unixepoch', 'localtime'), TIME(pass_start, 'unixepoch', 'localtime'), TIME(pass_end, 'unixepoch', 'localtime'), max_elev, direction, azimuth_at_max, device, signal_type, status, pass_start, row_id FROM transits ORDER BY pass_start DESC");
 
         table += "<table>\n";
-        table += make_header_row("Satellite Name", "Pass Start<br>(" +tz + ")", "Pass End<br>(" + tz + ")", "Max.<br>Elevation" , "Image<br>Count");
+        table += make_header_row("Satellite Name", "Pass Start<br>(" + utc_delta_s + ")", "Pass End<br>(" + utc_delta_s + ")", "Max.<br>Elevation" , "Image<br>Count", "");
         std::string date = "";
         for (Row pass : statement) {
             std::string pDate = pass.GetString(1); // date-start
@@ -258,11 +285,19 @@ std::string passes() {
             auto files = file_list(safeSatName, std::atol(pass.GetString(10)));
 
             std::string cnt = "";
+            std::string lnk = "";
             if (files.size()) {
                 cnt = "<a href=\"files?sat-name=" + safeSatName + "&start=" + pass.GetString(10) + "\">" + std::to_string(files.size()) + "</a>";
             }
             else if (std::string(pass.GetString(9)) == "complete") {
                 cnt = "0";
+            }
+            else {
+                // this must be a 'future' pass, so offer a delete option
+                lnk += std::string("<a href=\"pass_del?pass_row=") + 
+                         pass.GetString(11) + 
+                         "\"><img class=\"icon\" src=\"./delete-icon.png\"" +
+                         " alt=\"delete\"></a>";
             }
 
             table += make_row(pass.GetString(0), // sat_name
@@ -271,7 +306,8 @@ std::string passes() {
                      elev,                       // max. elev.
                      // pass.GetString(6),          // azimuth @ max.
                      // pass.GetString(5),          // dir
-                     cnt);                       // extracted file count
+                     cnt,                        // extracted file count
+                     lnk);
         }
         table += "</table>\n";
     }
@@ -311,14 +347,16 @@ int main(int argc, char *argv[])
     }
   }
 
-  tz = getTZ();
+  utc_delta_s = utc_delta();
   httplib::Server svr;
   auto ret = svr.set_mount_point("/", "./www"); // everything in here is
                                                  // served by default
   if (!ret) {
-    // The specified base directory doesn't exist...
+    std::cout << "Cannot locate ./www" << std::endl;
+    exit(0);
   }
 
+  // default to the pass schedule
   svr.Get("/", [](const httplib::Request& /* req */, httplib::Response& res) {
     res.set_redirect("./passes");
   });
@@ -342,6 +380,13 @@ int main(int argc, char *argv[])
       sat_del(req.params.find("sat_row")->second);
     }
     res.set_redirect("./satellites");
+  });
+
+  svr.Get("/pass_del", [](const httplib::Request& req, httplib::Response& res) {
+    if (req.params.find("pass_row") != req.params.end()) {
+      pass_del(req.params.find("pass_row")->second);
+    }
+    res.set_redirect("./passes");
   });
 
   svr.Post("/sat_save", [](const httplib::Request& req, httplib::Response& res) {
@@ -388,6 +433,7 @@ int main(int argc, char *argv[])
     }
    });
 
+  // for now jist ignoring unknown URLs
 
   svr.listen("0.0.0.0", port);
 }
