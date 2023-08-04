@@ -9,6 +9,7 @@ table, tr, th, td {
 
 table {
   border-collapse: collapse;
+  width: 80%;
 }
 
 th {
@@ -44,6 +45,9 @@ table.satform {
   background-color: lightGray;
 }
 
+.topnav {
+  border: none;
+}
 img.icon {
   width: 2em;
   height: 2em;
