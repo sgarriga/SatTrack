@@ -64,5 +64,8 @@ done
 # Clean up the overlay
 rm -f "${overlay}"
 
+# Clean up useless files
+find ${img_dir} -type f -name "${root_name}*png" -size -2k -delete
+
 echo "$(date +"%x %X") : End $0"
 
