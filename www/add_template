@@ -49,9 +49,9 @@
   <td class="satform">
   <fieldset>
     <legend>Bias Tee</legend>
-    <label><input type="radio" name="biast" value="OFF" checked />Off</label><br>
-    <label><input type="radio" name="biast" value="GPIO1" />GPIO</label><br>
-    <label><input type="radio" name="biast" value="USB" />USB</label> 
+    <label><input type="radio" name="biast" value="off" checked />Off</label><br>
+    <label><input type="radio" name="biast" value="gpio1" />GPIO Pin 1</label><br>
+    <label><input type="radio" name="biast" value="usb" />USB</label> 
   </fieldset>
   </td>
   </tr>

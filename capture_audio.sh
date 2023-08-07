@@ -92,7 +92,7 @@ timeout "${duration}" rtl_fm ${dev_id} ${bias_tee} -f "${freq}"M -s ${sample} "$
   sox -t raw -r ${sample} -b 16 ${sox_extra} -c ${channels} -e signed-integer - -t wav "${outfile}" rate ${rate}
 
 # Turn off Bias-Tee if 'usb' was passed in
-if [ $6 = usb ]; then
+if [ "$6" = "usb" ]; then
     rtl_biast -b 0
 fi
 
