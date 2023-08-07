@@ -1,5 +1,5 @@
 #!/bin/bash
-# Purpose: Decode an LRPT format WAV file into one or more .jpg images
+# Purpose: Decode an LRPT format WAV file into one or more .png images
 #
 # Input parameters:
 #   1. LRPT Wav Name
@@ -19,17 +19,17 @@ qpsk=${img_dir}/work/${root_name}.qpsk
 bmp=${img_dir}/${root_name}.bmp
 img=${img_dir}/${root_name}.png
 
-# Extract ymbols to a .qpsk file
+# Extract symbols to a .qpsk file
 meteor_demod --quiet --batch --output "${qpsk}" "${1}"
-if [ $? -eq 0 ]; then
+if [ $? -ne 0 ]; then
   echo "$(date +"%x %X") : Error generating QPSK"
 fi
 
 # Use .qpsk to generate a bitmap image
-medet_arm "${qpsk}" "${bmp}" -cd
-if [ -e  "${bmp}" ]; then
+medet_arm "${qpsk}" "${bmp}" -cd -q
+if [ -e "${bmp}" ]; then
   rm -f "${qpsk}"
-  # Convert the bitpap to a .png
+  # Convert the bitmap to a .png
   convert "${bmp}" "${png}"
   if [ $? -eq 0 ]; then
     rm -f "${bmp}"
