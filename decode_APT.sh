@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# Purpose: Decode an APT format WAV file into one or more .jpg images
+# Purpose: Decode an APT format WAV file into one or more .png images
 #
 # Input parameters:
 #   1. APT Wav Name
@@ -32,6 +32,12 @@ if grep -q "wxtoimg: warning: couldn.t find telemetry data" "${err}"; then
   echo "$(date +"%x %X") : End $0"
   exit
 fi
+if grep -q "wxtoimg: error: out of memory" "${err}"; then
+  rm -f "${img}" "${err}" 
+  echo "$(date +"%x %X") : Out of memory"
+  echo "$(date +"%x %X") : End $0"
+  exit
+fi
 rm -f "${err}" 
 
 echo "$(date +"%x %X") : Create overlay map"
@@ -55,6 +61,9 @@ for enh in ZA MB MD BD CC EC HE HF JF JJ LC TA WV WV-old NO veg ice sea sea-day 
   if grep -q "wxtoimg: warning: couldn.t find telemetry data" "${err}"; then
     rm -f "${img}"
   fi
+  if grep -q "wxtoimg: error: out of memory" "${err}"; then
+    rm -f "${img}"
+  fi
   rm -f "${err}"
 
 done
@@ -65,7 +74,15 @@ done
 rm -f "${overlay}"
 
 # Clean up useless files
+## < 2Kb is not a useful image
 find ${img_dir} -type f -name "${root_name}*png" -size -2k -delete
+
+## 1 pixel high is not a useful image
+for img in "${img_dir}/${root_name}*png"; do
+    if file ${img} | grep -q " x 1,"; then
+        rm ${img}
+    fi
+done
 
 echo "$(date +"%x %X") : End $0"
 
