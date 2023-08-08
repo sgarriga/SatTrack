@@ -1,6 +1,8 @@
 # SatTrack
 
-While raspberry-noaa(-v2) was working great for me I wanted to streamline things and take a different approach to configuration such that I could capture any VHF or UHF satellite transmissions my RTL-SDR dongle and antenna(s) could handle, and decode them as weather images, SSTV, CW, etc.
+While raspberry-noaa(-v2) was working great for me I wanted to streamline things and take a different approach to configuration (i.e. use the database more) such that I could capture any VHF or UHF satellite transmissions my RTL-SDR dongle and antenna(s) could handle, and decode them as weather images, SSTV, CW, etc.
+
+I also wanted to do my own thing with the web interface.
 
 Standing on the shoulders of giants, this project is highly indebted to the following...
 
@@ -13,3 +15,18 @@ Standing on the shoulders of giants, this project is highly indebted to the foll
 * SSTV Decoder #2 - [sstv](https://github.com/colaclanth/sstv)
 * Turn Realtek RTL2832 USB dongle into an SDR receiver - [RTL-SDR](https://gitea.osmocom.org/sdr/rtl-sdr)
 * Bias Tee via USB - [RTL-SDR-Blog](https://github.com/rtlsdrblog/rtl-sdr-blog)
+
+Installation:
+
+1 start with a clean Raspian image
+2 cd ~
+3 git clone https://github.com/sgarriga/SatTrack.git
+4 cd SatTrack/config
+5 If you want to run on a port other than 8080, replace that value in file SatTrack.service
+6 ./set-up.sh
+7 If advised to do so, manually update /etc/ImageMagick-6/policy.xml
+8 cd ../src
+9 make
+10 sudo reboot
+
+
