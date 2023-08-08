@@ -11,6 +11,7 @@
 
 static char *db = nullptr;
 static std::string image_dir = "./image/";
+static std::string wav_dir = "./wavs/";
 static std::string utc_delta_s = "UTC";
 
 // a set of routines to build an HTML table with an arbitrary number of columns
@@ -53,12 +54,17 @@ std::string getTemplate(const char *name) {
     return std::string(bytes.data(), size);
 }
 
-// get a vector list of files associated with a satellite pass
-std::vector <std::string>file_list(std::string safeSatName, long passStart) {
+// greate a filename root
+std::string root_name(std::string safeSatName, long passStart) {
     std::time_t t = static_cast<std::time_t>(passStart);
     char buff[64];
     strftime(buff, sizeof(buff), "%Y%m%d%H%M%S", gmtime(&t));
-    std::string wildcard = image_dir + safeSatName + "-" + buff + "*.png";
+    return safeSatName + "-" + buff;
+}
+
+// get a vector list of files associated with a satellite pass
+std::vector <std::string>file_list(std::string safeSatName, long passStart) {
+    std::string wildcard = image_dir + root_name(safeSatName, passStart) + "*.png";
     auto files = Glob(wildcard);
     return files;
 }
@@ -132,7 +138,7 @@ void sat_del(std::string sat_row_id) {
     }
 }
 
-// delete a satellite pass entry (by row id) - if it's nod complete or in-progress
+// delete a satellite pass entry (by row id) - if it's not complete or in-progress
 void pass_del(std::string pass_row_id) {
     try {
         Connection connection = Connection(db);
@@ -291,6 +297,11 @@ std::string passes() {
             }
             else if (std::string(pass.GetString(9)) == "complete") {
                 cnt = "0";
+                lnk += std::string("<img class=\"icon\"") + 
+                         " src=\"./listen-icon.png\"" +
+                         " onclick=\"playWav(this, './wav/" + 
+                         root_name(safeSatName, std::atol(pass.GetString(10))) +
+                         ".wav')\" alt=\"listen\">";
             }
             else {
                 // this must be a 'future' pass, so offer a delete option
@@ -430,6 +441,20 @@ int main(int argc, char *argv[])
         res.set_content(contents.str(), "image/png");
     }else{
         std::cout << "Not Found! - " << image_dir + id << std::endl;
+        res.status = 404;
+    }
+   });
+
+  svr.Get("/wav/:id", [&](const httplib::Request& req, httplib::Response& res){
+    auto id = req.path_params.at("id");
+    std::ifstream in(wav_dir + id, std::ios::in | std::ios::binary);
+    if(in){
+        std::ostringstream contents;
+        contents << in.rdbuf();
+        in.close();
+        res.set_content(contents.str(), "audio/wav");
+    }else{
+        std::cout << "Not Found! - " << wav_dir + id << std::endl;
         res.status = 404;
     }
    });

@@ -3,6 +3,28 @@
 <head>
 <meta charset="UTF-8">
 <link rel="stylesheet" href="sat-track.css">
+<script>
+  var audio = null;
+  var playing;
+
+  function playWav(e, wav_url) {
+    if (audio === null) {
+       audio = new Audio(wav_url);
+       audio.type = 'audio/wave';
+       playing = e;
+       e.style.background = "#00ff00";
+       audio.play();
+    }
+    else {
+       e.style.background = "#2cdde6";
+       audio.pause();
+       audio = null;
+       if (playing != e) {
+           playWav(wav_url);
+       }
+    }
+}
+</script>
 <title>SatTrack</title>
 </head>
 <body>
