@@ -1,0 +1,10 @@
+[Unit]
+Description=Start the dedicated HTTP server for SatTrack
+After=multi-user.target
+
+[Service]
+ExecStart=/bin/bash -c '/home/pi/SatTrack/sat-track-svr -p 8080 /home/pi/SatTrack/sat-track.db >/home/pi/SatTrack/sat-track-svr.log 2>&1'
+
+[Install]
+WantedBy=multi-user.target
+

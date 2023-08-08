@@ -172,7 +172,7 @@ else
     sqlite3 ../sat-track.db < create_tables.sql
 fi
 
-if [ -e ~/.wxtoimglic '; then
+if [ -e ~/.wxtoimglic ]; then
     echo WxToImg configured
 else
     cp ./wxtoimglic ~/.wxtoimglic 
@@ -188,6 +188,15 @@ else
     cat crontab crontab.backup | crontab -
 fi
 
+# Create systemd service for HTTP server
+if [ -e /lib/systemd/system/SatTrack.service ]; then
+    echo SatTrack.service already present
+else
+    echo Installing SatTrack.service
+    sudo cp SatTrack.service /lib/systemd/system/
+    sudo systemctl daemon-reload
+    sudo systemctl enable SatTrack.service
+fi
 
 ## Check for <policy domain="path" rights="none" pattern="@*" />
 ## in file /etc/ImageMagick-6/policy.xml
