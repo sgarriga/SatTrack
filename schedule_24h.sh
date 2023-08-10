@@ -30,10 +30,17 @@ if [ -e ${norad_data} ]; then
 fi
 if [ ! -e ${norad_data} ]; then
   echo "$(date +"%x %X") : Fetching NORAD elements"
-  wget -q "http://www.celestrak.org/NORAD/elements/weather.txt" --no-check-certificate -O - >  "${norad_data}"
-  wget -q "http://www.celestrak.org/NORAD/elements/visible.txt" --no-check-certificate -O - >> "${norad_data}" 
-  wget -q "http://www.celestrak.org/NORAD/elements/amateur.txt" --no-check-certificate -O - >> "${norad_data}" 
-  echo "$(date +"%x %X") : NORAD elements aquired"
+  wget -q "http://www.celestrak.org/NORAD/elements/weather.txt" --no-check-certificate -O - >  "${norad_data}.new"
+  wget -q "http://www.celestrak.org/NORAD/elements/visible.txt" --no-check-certificate -O - >> "${norad_data}.new" 
+  wget -q "http://www.celestrak.org/NORAD/elements/amateur.txt" --no-check-certificate -O - >> "${norad_data}.new" 
+
+  if [ -s "${norad_data}.new" ]; then
+      echo "$(date +"%x %X") : NORAD elements aquired"
+      mv -f "${norad_data}.new" "${norad_data}"
+  else
+      echo "$(date +"%x %X") : NORAD elements not available - using old data"
+      rm -f "${norad_data}.new"
+  fi
 
   if [ ! -e ${norad_names} ]; then
     touch "${norad_names}"

@@ -11,7 +11,7 @@
 echo "$(date +"%x %X") : Start $0 $1 \"$2\" $3 $4"
 
 cmd_path=$(readlink -f ${0//decode_APT.sh/})
-img_dir=${cmd_path}/image
+img_dir=${cmd_path}/www/img
 
 if [ "${4}" = "Northbound" ]; then
   ns="-N"
@@ -78,10 +78,14 @@ rm -f "${overlay}"
 find ${img_dir} -type f -name "${root_name}*png" -size -2k -delete
 
 ## 1 pixel high is not a useful image
-for img in "${img_dir}/${root_name}*png"; do
+for img in ${img_dir}/${root_name}*png; do
     if file ${img} | grep -q " x 1,"; then
         rm ${img}
     fi
+
+    # since we're keeping the file, create a thumbnail
+    thumb=`echo "${img}" | sed "s?img?&/thumb?"`
+    convert -thumbnail 300 "${img}" "${thumb}"
 done
 
 echo "$(date +"%x %X") : End $0"

@@ -32,11 +32,12 @@
 *.app
 
 # Work Files
-image/*
-wavs/*
 *.log
 full_norad.tle
 sat-track.db
 sat-track-svr
 src/sat-track-svr
 norad_names.txt
+sat-track-svr.old
+www/img/*
+www/wav/*

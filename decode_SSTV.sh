@@ -11,7 +11,7 @@
 echo "$(date +"%x %X") : Start $0 $1 \"$2\" $3 $4"
 
 cmd_path=$(readlink -f ${0//decode_APT.sh/})
-img_dir=${cmd_path}/image
+img_dir=${cmd_path}/www/img
 
 # Get the basic image
 root_name=`echo ${1} | sed 's/.*\///' | sed 's/\.wav//'`

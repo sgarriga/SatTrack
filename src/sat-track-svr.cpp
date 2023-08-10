@@ -4,14 +4,15 @@
 #include <cstdio>
 #include <iostream>
 #include <chrono>
+#include <filesystem>
 #include "sqlite3++.hpp"
 #include "httplib.h"
 
 #include "glob.hpp"
 
 static char *db = nullptr;
-static std::string image_dir = "./image/";
-static std::string wav_dir = "./wavs/";
+static std::string image_dir = "./www/img/";
+static std::string wav_dir = "./www/wav/";
 static std::string utc_delta_s = "UTC";
 
 // a set of routines to build an HTML table with an arbitrary number of columns
@@ -246,12 +247,40 @@ std::string satellite_opts() {
 std::string files(std::string safeSatName, long passStart) {
     std::string table = "";
     try {
-            table += "<table>\n";
-            auto files = file_list(safeSatName, passStart);
-            table += make_header_row("Images");
-            for (auto & elem : files) {
-                table += make_row(elem + "<br><img src=\"" + elem + "\">");
+        table += "<table>\n";
+        auto files = file_list(safeSatName, passStart);
+        // 'files' returmed is a list of original images. We may want to 
+        // present a thumbnail (if it exists)
+
+        table += make_header_row("Images");
+        std::string td, thumb;
+        std::filesystem::path thumb_path;
+        for (auto & elem : files) {
+            thumb = elem; // make copy of image path
+
+            // convert real image path to URI
+            elem.replace(elem.find("www/img"), 7, "image");
+            td = elem + "<br>";
+
+            // modify real path to look for thumbnail, and do so...
+            thumb.replace(thumb.find("img"), 3, "img/thumb");
+            thumb_path = thumb;
+            if (std::filesystem::exists(thumb_path)) {
+
+                // convert thumbnail real path to URI
+                thumb.replace(thumb.find("www/img/thumb"), 13, "thumb");
+
+                // presnt the thumbnail and a link to the big image
+                td += "<a href=\"" + elem + "\">";
+                td += "<img src=\"" + thumb + "\">";
+                td += "</a>";
             }
+            else {
+                // no thumbnail so presnt the original image
+                td += "<img src=\"" + elem + "\">";
+            }
+            table += make_row(td);
+        }
         table += "</table>\n";
     }
     catch (Exception const & e) {
@@ -430,6 +459,20 @@ int main(int argc, char *argv[])
     body.replace(body.find("{{}}"), 4, satellites());
     res.set_content(body.c_str(), "text/html");
   });
+
+  svr.Get("/thumb/:id", [&](const httplib::Request& req, httplib::Response& res){
+    auto id = req.path_params.at("id");
+    std::ifstream in(image_dir + "thumb/" + id, std::ios::in | std::ios::binary);
+    if(in){
+        std::ostringstream contents;
+        contents << in.rdbuf();
+        in.close();
+        res.set_content(contents.str(), "image/png");
+    }else{
+        std::cout << "Not Found! - " << image_dir + "thumb/" + id << std::endl;
+        res.status = 404;
+    }
+   });
 
   svr.Get("/image/:id", [&](const httplib::Request& req, httplib::Response& res){
     auto id = req.path_params.at("id");

@@ -10,7 +10,7 @@ echo "$(date +"%x %X") : Start $0 \"$1\" $2"
 
 cmd_path=$(readlink -f ${0//process_transit.sh/})
 db=${cmd_path}/sat-track.db
-wav_dir=${cmd_path}/wavs
+wav_dir=${cmd_path}/www/wav
 
 # Get transit details from DB into a variable
 set -f

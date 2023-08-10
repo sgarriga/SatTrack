@@ -10,7 +10,7 @@
 echo "$(date +"%x %X") : Start $0 $1 \"$2\" $3 $4"
 
 cmd_path=$(readlink -f ${0//decode_LRPT.sh/})
-img_dir=${cmd_path}/image
+img_dir=${cmd_path}/www/img
 
 echo "$(date +"%x %X") : Create base image"
 
@@ -39,6 +39,21 @@ if [ -e "${bmp}" ]; then
 else
   echo "$(date +"%x %X") : Unable to generate bitmap"
 fi
+
+# Clean up useless files
+## < 2Kb is not a useful image
+find ${img_dir} -type f -name "${root_name}*png" -size -2k -delete
+
+## 1 pixel high is not a useful image
+for img in ${img_dir}/${root_name}*png; do
+    if file ${img} | grep -q " x 1,"; then
+        rm ${img}
+    fi
+
+    # since we're keeping the file, create a thumbnail
+    thumb=`echo "${img}" | sed "s?img?&/thumb?"`
+    convert -thumbnail 300 "${img}" "${thumb}"
+done
 
 echo "$(date +"%x %X") : Done $0"
 
