@@ -144,6 +144,7 @@ void pass_del(std::string pass_row_id) {
     try {
         Connection connection = Connection(db);
 
+        // delete the pass if it hasn't happened yet or isn't in progress
         std::string del = std::string("DELETE FROM passes WHERE rowid=") + pass_row_id + " AND status!=\"complete\" AND status!=\"active\";";
         Execute(connection, del.c_str());
         
@@ -321,11 +322,13 @@ std::string passes() {
 
             std::string cnt = "";
             std::string lnk = "";
-            if (files.size()) {
-                cnt = "<a href=\"files?sat-name=" + safeSatName + "&start=" + pass.GetString(10) + "\">" + std::to_string(files.size()) + "</a>";
-            }
-            else if (std::string(pass.GetString(9)) == "complete") {
-                cnt = "0";
+            if (std::string(pass.GetString(9)) == "complete") {
+                if (files.size()) {
+                    cnt = "<a href=\"files?sat-name=" + safeSatName + "&start=" + pass.GetString(10) + "\">" + std::to_string(files.size()) + "</a>";
+                }
+                else {
+                    cnt = "0";
+                }
                 lnk += std::string("<img class=\"icon\"") + 
                          " src=\"./listen-icon.png\"" +
                          " onclick=\"playWav(this, './wav/" + 
@@ -334,6 +337,7 @@ std::string passes() {
             }
             else {
                 // this must be a 'future' pass, so offer a delete option
+                // (we will check the status again in case it's too late)
                 lnk += std::string("<a href=\"pass_del?pass_row=") + 
                          pass.GetString(11) + 
                          "\"><img class=\"icon\" src=\"./delete-icon.png\"" +
