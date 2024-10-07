@@ -41,3 +41,4 @@ norad_names.txt
 sat-track-svr.old
 www/img/*
 www/wav/*
+config/crontab.backup

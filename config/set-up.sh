@@ -5,37 +5,36 @@
 #     none
 #
 # Example:
-#  ./prerequisites.sh
+# . ./set-up.sh
 
 #set -e
+CONFIG=$PWD
 
 ### Install required packages
 echo "Installing required APT packages..."
 
 sudo apt update -yq
-sudo apt install -yq predict \
-                     python-setuptools \
+sudo apt install -yq python3-setuptools \
                      ntp \
                      cmake \
                      git \
                      git-core \
                      build-essential \
                      libusb-1.0-0-dev \
-                     sox \
+                     sox libasound2 libasound2-dev \
                      at \
                      bc \
                      nginx \
-                     libncurses5-dev \
-                     libncursesw5-dev \
+                     libncurses5-dev libncursesw5-dev \
                      libatlas-base-dev \
                      python3-pip \
                      imagemagick \
                      fonts-freefont-otf \
                      libxft-dev \
                      libxft2 \
-                     libjpeg9 \
-                     libjpeg9-dev \
+                     libjpeg62-turbo-dev \
                      socat \
+                     sqlite3 \
                      libsqlite3-dev
 
 echo "APT packages installed"
@@ -44,28 +43,30 @@ echo "APT packages installed"
 if [ -e /etc/modprobe.d/rtlsdr.conf ]; then
     echo "DVB modules were already blacklisted"
 else
-    sudo echo "blacklist dvb_usb_rtl28xxu:blacklist rtl2832:blacklist rtl2830" | tr ':' '\n' > /etc/modprobe.d/rtlsdr.conf
+    echo "blacklist dvb_usb_rtl28xxu" | sudo tee -a /etc/modprobe.d/rtlsdr.conf
+    echo "blacklist rtl2832" | sudo tee -a /etc/modprobe.d/rtlsdr.conf
+    echo "blacklist rtl2830" | sudo tee -a /etc/modprobe.d/rtlsdr.conf
     echo "DVB modules are blacklisted now"
 fi
 
-# ### Install RTL-SDR
-# if [ -e /usr/local/bin/rtl_fm ]; then
-#     echo "rtl-sdr was already installed"
-# else
-#     echo "Installing rtl-sdr from osmocom..."
-#     cd $HOME
-#     git clone https://github.com/osmocom/rtl-sdr.git
-#     cd rtl-sdr/
-#     mkdir build
-#     cd build
-#     cmake ../ -DINSTALL_UDEV_RULES=ON -DDETACH_KERNEL_DRIVER=ON
-#     make
-#     sudo make install
-#     sudo ldconfig
-#     cd $HOME
-#     sudo cp ./rtl-sdr/rtl-sdr.rules /etc/udev/rules.d/
-#     echo "rtl-sdr install done"
-# fi
+if [ -e /usr/lib/libasound.so ]; then
+    echo "libasound link is present"
+else
+    sudo ln -s /usr/lib/aarch64-linux-gnu/libasound.so.2 /usr/lib/libasound.so
+    echo "created libasound link"
+fi
+
+if [ -e /usr/local/bin/predict ]; then
+    echo "Predict already installed"
+else
+    cd $HOME
+    wget https://www.qsl.net/kd2bd/predict-2.3.1.tar.gz
+    gunzip predict-2.3.1.tar.gz
+    tar xvf predict-2.3.1.tar
+    cd predict-2.3.1
+    sudo ./configure
+    rm -f predict-2.3.1.tar.gz  predict-2.3.1.tar
+fi
 
 ### Install RTL-SDR with USB Bias Tee support
 if [ -e /usr/local/bin/rtl_biast ]; then
@@ -150,20 +151,27 @@ if [ -d "$HOME/cpp-httplib" ]; then
     echo "cpp-httplib already installed"
 else
     echo "Installing cpp-httplib..."
+    cd $HOME
     git clone https://github.com/yhirose/cpp-httplib.git
     echo "cpp-httplib installed"
 fi
 
-if [ -e  /usr/local/bin/sstv ]; then
+if [ -e  "/usr/local/bin/sstv" ]; then
     echo "sstv already installed"
 else
     echo "Installing sstv..."
-    git clone https://github.com/colaclanth/sstv
-    python setup.py install
+    cd $HOME
+    git clone https://github.com/sgarriga/c_sstv
+    cd c_sstv
+    ./build_sstv.sh
+    sudo cp sstv/sstv/sstv /usr/local/bin/sstv
     echo "sstv installed"
 fi
 
 echo "Installs done!"
+
+# make sure we are where we should be
+cd $CONFIG
 
 if [ -e ../sat-track.db ]; then
     echo DB exists

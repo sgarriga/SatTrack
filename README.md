@@ -17,20 +17,21 @@ Standing on the shoulders of giants, this project is highly indebted to the foll
 * Bias Tee via USB - [RTL-SDR-Blog](https://github.com/rtlsdrblog/rtl-sdr-blog)
 
 Installation:
-1. start with a clean Raspian image
+1. start with a clean Raspian BOOKWORM image
 2. cd ~
-3. git clone https://github.com/sgarriga/SatTrack.git
-4. cd SatTrack/config
-5. Update file wxtoimgrc with your latitude and longitude
-6. If you want to run on a port other than 8080, replace that value in file SatTrack.service
-7. ./set-up.sh
-8. If advised to do so, manually update /etc/ImageMagick-6/policy.xml
-9. cd ../src
-10. make
-11. cd ..
-12. ./schedule_24h.sh
-13. sudo reboot
-14. point your browser at http://{your Pi's IP}:{port in SatTrack.service}
-15. add some satellites to track
-16. ./schedule_24h.sh
+3. sudo apt install git
+4. git clone https://github.com/sgarriga/SatTrack.git
+5. cd SatTrack/config
+6. Update file wxtoimgrc with your latitude and longitude
+7. If you want to run on a port other than 8080, replace that value in file SatTrack.service
+8. ./set-up.sh
+9. If advised to do so, manually update /etc/ImageMagick-6/policy.xml
+10. cd ../src
+11. make
+12. cd ..
+13. ./schedule_24h.sh
+14. sudo reboot
+15. point your browser at http://{your Pi's IP}:{port in SatTrack.service}
+16. add some satellites to track
+17. ./schedule_24h.sh
 
