@@ -27,11 +27,12 @@ Installation:
 8. ./set-up.sh
 9. If advised to do so, manually update /etc/ImageMagick-6/policy.xml
 10. cd ../src
-11. make
-12. cd ..
-13. ./schedule_24h.sh
-14. sudo reboot
-15. point your browser at http://{your Pi's IP}:{port in SatTrack.service}
-16. add some satellites to track
-17. ./schedule_24h.sh
+11. ./fix_swap.sh
+12. make
+13. cd ..
+14. ./schedule_24h.sh
+15. sudo reboot
+16. point your browser at http://{your Pi's IP}:{port in SatTrack.service}
+17. add some satellites to track
+18. ./schedule_24h.sh
 
