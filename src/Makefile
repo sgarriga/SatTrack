@@ -10,7 +10,9 @@ all: ${TARGET}
 sat-track-svr: sat-track-svr.cpp handle.hpp sqlite3++.hpp glob.hpp
 	@echo $@ cares about $<
 	${CXX} ${CXXFLAGS} ${INCL} $< -o $@ ${LIBS}
-	mv -f ../$@ ../$@.old
+	ifneq ("$(wildcard ../$@.old)","")
+		mv -f ../$@ ../$@.old
+	endif
 	cp $@ ../
 
 .PHONY: clean
