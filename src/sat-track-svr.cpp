@@ -84,10 +84,10 @@ const std::string utc_delta() {
 std::string sat_updt_links(std::string sat_id) {
     std::string ret = "";
     ret += "<a href=\"sat_edit?sat_row=" + sat_id + "\">";
-    ret += "<img class=\"icon\" src=\"/home/pi/SatTrack/edit-icon.png\" alt=\"edit\">";
+    ret += "<img class=\"icon\" src=\"./edit-icon.png\" alt=\"edit\">";
     ret += "</a>&nbsp;&nbsp;";
     ret += "<a href=\"sat_del?sat_row=" + sat_id + "\">";
-    ret += "<img class=\"icon\" src=\"/home/pi/SatTrack/delete-icon.png\" alt=\"delete\">";
+    ret += "<img class=\"icon\" src=\"./delete-icon.png\" alt=\"delete\">";
     ret += "</a>";
     return ret;
 }
@@ -118,7 +118,7 @@ std::string satellites() {
                           "",
                           "",
                           "",
-                          "<a href=\"sat_add\"><img class=\"icon\" src=\"/home/pi/SatTrack/add-icon.png\" alt=\"add\"></a>");
+                          "<a href=\"sat_add\"><img class=\"icon\" src=\"./add-icon.png\" alt=\"add\"></a>");
         table += "</table>\n";
     }
     catch (Exception const & e) {
@@ -330,7 +330,7 @@ std::string passes() {
                     cnt = "0";
                 }
                 lnk += std::string("<img class=\"icon\"") + 
-                         " src=\"/home/pi/SatTrack/listen-icon.png\"" +
+                         " src=\"./listen-icon.png\"" +
                          " onclick=\"playWav(this, '/home/pi/SatTrack/wav/" + 
                          root_name(safeSatName, std::atol(pass.GetString(10))) +
                          ".wav')\" alt=\"listen\">";
@@ -340,7 +340,7 @@ std::string passes() {
                 // (we will check the status again in case it's too late)
                 lnk += std::string("<a href=\"pass_del?pass_row=") + 
                          pass.GetString(11) + 
-                         "\"><img class=\"icon\" src=\"/home/pi/SatTrack/delete-icon.png\"" +
+                         "\"><img class=\"icon\" src=\"./delete-icon.png\"" +
                          " alt=\"delete\"></a>";
             }
 
@@ -402,7 +402,7 @@ int main(int argc, char *argv[])
 
   // default to the pass schedule
   svr.Get("/", [](const httplib::Request& /* req */, httplib::Response& res) {
-    res.set_redirect("/home/pi/SatTrack/passes");
+    res.set_redirect("./passes");
   });
 
   svr.Get("/passes", [](const httplib::Request& /* req */, httplib::Response& res) {
@@ -423,19 +423,19 @@ int main(int argc, char *argv[])
     if (req.params.find("sat_row") != req.params.end()) {
       sat_del(req.params.find("sat_row")->second);
     }
-    res.set_redirect("/home/pi/SatTrack/satellites");
+    res.set_redirect("./satellites");
   });
 
   svr.Get("/pass_del", [](const httplib::Request& req, httplib::Response& res) {
     if (req.params.find("pass_row") != req.params.end()) {
       pass_del(req.params.find("pass_row")->second);
     }
-    res.set_redirect("/home/pi/SatTrack/passes");
+    res.set_redirect("./passes");
   });
 
   svr.Post("/sat_save", [](const httplib::Request& req, httplib::Response& res) {
     sat_save(req.params);
-    res.set_redirect("/home/pi/SatTrack/satellites");
+    res.set_redirect("./satellites");
   });
 
   svr.Get("/sat_edit", [](const httplib::Request& req, httplib::Response& res) {
@@ -446,7 +446,7 @@ int main(int argc, char *argv[])
       res.set_content(body.c_str(), "text/html");
     }
     else {
-      res.set_redirect("/home/pi/SatTrack/satellites");
+      res.set_redirect("./satellites");
     }
   });
 
