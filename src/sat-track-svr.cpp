@@ -11,8 +11,8 @@
 #include "glob.hpp"
 
 static char *db = nullptr;
-static std::string image_dir = "./www/img/";
-static std::string wav_dir = "./www/wav/";
+static std::string image_dir = "/home/pi/SatTrack/www/img/";
+static std::string wav_dir = "/home/pi/SatTrack/www/wav/";
 static std::string utc_delta_s = "UTC";
 
 // a set of routines to build an HTML table with an arbitrary number of columns
