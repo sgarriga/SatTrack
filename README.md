@@ -41,7 +41,10 @@ Maybe<br>
         * NOAA 19 - 137.1000 MHz
     * LRPT format weather images
         * Meteor-M N2 - 137.9250 MHz
-    * Occasional SSTV format broadcasts
-        * ISS (ZARYA) - 145.8000 MHz
+    * SSTV format broadcasts
+        * ISS (ZARYA) - 145.8000 MHz **infrequent** *list ARISS pass dates (YYYY-MM-DDDD one per line) in *`~/.ariss.dates`
+        * SPROUT - 437.600 MHz (*Sunday* in Japan) ** NO LONGER ACTIVE **
+    * CW format broadcasts
+        * SPROUT - 437.525 MHz (*Monday - Saturday* in Japan) ** NO LONGER ACTIVE **
 18. `./schedule_24h.sh`
 
