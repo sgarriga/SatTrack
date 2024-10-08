@@ -305,7 +305,7 @@ std::string passes() {
     try {
         Connection connection = Connection(db);
 
-        Statement statement(connection, "SELECT sat_name, DATE(pass_start, 'unixepoch', 'localtime'), TIME(pass_start, 'unixepoch', 'localtime'), TIME(pass_end, 'unixepoch', 'localtime'), max_elev, direction, azimuth_at_max, device, signal_type, status, pass_start, rowid FROM transits ORDER BY pass_start DESC");
+        Statement statement(connection, "SELECT sat_name, DATE(pass_start, 'unixepoch', 'localtime'), TIME(pass_start, 'unixepoch', 'localtime'), TIME(pass_end, 'unixepoch', 'localtime'), max_elev, direction, azimuth_at_max, device, signal_type, status, pass_start, rowid FROM TRANSITS ORDER BY pass_start DESC");
 
         table += "<table>\n";
         table += make_header_row("Satellite Name", "Pass Start<br>(" + utc_delta_s + ")", "Pass End<br>(" + utc_delta_s + ")", "Max.<br>Elevation" , "Image<br>Count", "");

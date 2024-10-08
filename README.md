@@ -28,7 +28,7 @@ Installation:
 9. If advised to do so, manually update /etc/ImageMagick-6/policy.xml
 10. `cd ../src`
 11. `./fix_swap.sh` *(compilation will ***never** finish with standard swap size)*
-12. `make` *(this still takes a ***long*** time)*
+12. `make` *(this takes about 10 minutes on my Pi)*
 13. `cd ..`
 14. `./schedule_24h.sh`
 15. `sudo reboot`
