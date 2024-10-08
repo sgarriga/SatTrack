@@ -24,7 +24,6 @@ sudo apt install -yq python3-setuptools \
                      sox libasound2 libasound2-dev \
                      at \
                      bc \
-                     nginx \
                      libncurses5-dev libncursesw5-dev \
                      libatlas-base-dev \
                      python3-pip \
