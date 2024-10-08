@@ -33,6 +33,17 @@ Installation:
 14. `./schedule_24h.sh`
 15. `sudo reboot`
 16. point your browser at http://{your Pi's IP}:{port in SatTrack.service}
-17. add some satellites to track
+17. add some satellites to track<br>
+Maybe<br>
+  APT format weather images<br>
+    NOAA 15 - 137.6200 MHz
+    NOAA 18 - 137.9125 MHz
+    NOAA 19 - 137.1000 MHz
+  LRPT format weather images<br>
+    Meteor-M N2 - 137.9250 MHz
+  Occasional SSTV format broadcasts<br>
+    ISS (ZARYA) - 145.8000 MHz
+
+
 18. `./schedule_24h.sh`
 
