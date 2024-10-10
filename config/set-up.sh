@@ -26,7 +26,7 @@ sudo apt install -yq python3-setuptools \
                      bc \
                      libncurses5-dev libncursesw5-dev \
                      libatlas-base-dev \
-                     python3-pip \
+                     python3-pip python3-scipy \
                      imagemagick \
                      fonts-freefont-otf \
                      libxft-dev \
@@ -160,10 +160,9 @@ if [ -e  "/usr/local/bin/sstv" ]; then
 else
     echo "Installing sstv..."
     cd $HOME
-    git clone https://github.com/sgarriga/c_sstv
-    cd c_sstv
-    ./build_sstv.sh
-    sudo cp sstv/sstv/sstv /usr/local/bin/sstv
+    git clone https://github.com/colaclanth/sstv.git
+    cd sstv
+    sudo python setup.py install --break-system-packages
     echo "sstv installed"
 fi
 

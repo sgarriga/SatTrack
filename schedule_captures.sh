@@ -22,7 +22,7 @@ start_s=$3
 end_s=$4
 sig_type=$5
 
-echo "$(date +"%x %X") : Start $0 $1 $2 $3 $4 $4"
+echo "$(date +"%x %X") : Start $0 $1 $2 $3 $4 $5"
 
 # Get full satellite details from DB
 ## set -f/+f avoids * expansion
@@ -48,7 +48,7 @@ fi
 ## drop every predicted point below our minimum elevation and
 ## determine start & end of passes (and some other info)
 transits=/tmp/transits.txt
-predict -t $tle_file -f "${sat_name}" "${start_s}" "${end_s}" | \
+predict -t $tle_file -q ${cmd_path}/config/predict.qth -f "${sat_name}" "${start_s}" "${end_s}" | \
   awk -v min="${sat_min}" '{if($5>=min){print $0}}' | \
   awk -f  ${cmd_path}/predicts2pass.awk > ${transits}
 if [ ! -s ${transits} ]; then

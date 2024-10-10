@@ -22,7 +22,7 @@ Installation:
 3. `sudo apt install git` *(full Bookworm probably already has this)*
 4. `git clone https://github.com/sgarriga/SatTrack.git`
 5. `cd SatTrack/config`
-6. Update file wxtoimgrc with your latitude and longitude
+6. Update files `wxtoimgrc` & `predict.qth`  with your latitude, longitude and altitude. Also update `predict.qth` with your callsign (if you have one).
 7. If you want to run on a port other than 8080, replace that value in file SatTrack.service
 8. `./set-up.sh` *(this pulls all the dependancies and automates ***most*** setup)*
 9. If advised to do so, manually update /etc/ImageMagick-6/policy.xml

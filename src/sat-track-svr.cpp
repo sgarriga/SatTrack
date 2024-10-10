@@ -145,7 +145,7 @@ void pass_del(std::string pass_row_id) {
         Connection connection = Connection(db);
 
         // delete the pass if it hasn't happened yet or isn't in progress
-        std::string del = std::string("DELETE FROM passes WHERE rowid=") + pass_row_id + " AND status!=\"complete\" AND status!=\"active\";";
+        std::string del = std::string("DELETE FROM TRANSITS WHERE rowid=") + pass_row_id + " AND status!=\"complete\" AND status!=\"active\";";
         Execute(connection, del.c_str());
         
     }
