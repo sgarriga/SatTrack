@@ -87,10 +87,10 @@ const std::string utc_delta() {
 std::string sat_updt_links(std::string sat_id) {
 	std::string ret = "";
 	ret += "<a href=\"sat_edit?sat_row=" + sat_id + "\">";
-	ret += "<img class=\"icon\" src=\"./edit-icon.png\" alt=\"edit\">";
+	ret += "<img class=\"icon\" src=\"./edit-icon.png\" alt=\"edit\" title=\"Modify satellite\">";
 	ret += "</a>&nbsp;&nbsp;";
 	ret += "<a href=\"sat_del?sat_row=" + sat_id + "\">";
-	ret += "<img class=\"icon\" src=\"./delete-icon.png\" alt=\"delete\">";
+	ret += "<img class=\"icon\" src=\"./delete-icon.png\" alt=\"delete\" title=\"Forget Satellite\">";
 	ret += "</a>";
 	return ret;
 }
@@ -121,7 +121,7 @@ std::string satellites() {
 				"",
 				"",
 				"",
-				"<a href=\"sat_add\"><img class=\"icon\" src=\"./add-icon.png\" alt=\"add\"></a>");
+				"<a href=\"sat_add\"><img class=\"icon\" src=\"./add-icon.png\" alt=\"add\" title=\"Add new satellite\"></a>");
 		table += "</table>\n";
 	}
 	catch (Exception const & e) {
@@ -336,7 +336,7 @@ std::string make_safe(std::string in) {
 					" src=\"./listen-icon.png\"" +
 					" onclick=\"playWav(this, '/home/pi/SatTrack/wav/" + 
 					root_name(safeSatName, std::atol(pass.GetString(10))) +
-					".wav')\" alt=\"listen\">";
+					".wav')\" alt=\"listen\" title=\"listen to recording\">";
 			}
 			else {
 				// this must be a 'future' pass, so offer a delete option
@@ -344,7 +344,7 @@ std::string make_safe(std::string in) {
 				lnk += std::string("<a href=\"pass_del?pass_row=") + 
 					pass.GetString(11) + 
 					"\"><img class=\"icon\" src=\"./delete-icon.png\"" +
-					" alt=\"delete\"></a>";
+					" alt=\"delete\" title=\"Ignore pass\"></a>";
 			}
 
 			table += make_row(pass.GetString(0), // sat_name
