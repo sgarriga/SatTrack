@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# Purpose: Decode an SSTV format WAV file into .png images
+# Purpose: Decode an SSTV format WAV file into BMP images
 #
 # Input parameters:
 #   1. APT Wav Name
@@ -13,15 +13,10 @@ echo "$(date +"%x %X") : Start $0 $1 \"$2\" $3 $4"
 cmd_path=$(readlink -f ${0//decode_SSTV.sh/})
 img_dir=${cmd_path}/www/img
 
-# Get the basic image
+# Get the base name
 root_name=`echo ${1} | sed 's/.*\///' | sed 's/\.wav//'`
 
-echo "$(date +"%x %X") : Pass 1 - pd120_decoder"
-echo python3 "$HOME/pd120_decoder/pd120_decoder/demod.py" "${1}" "${img_dir}"
-python3 "$HOME/pd120_decoder/pd120_decoder/demod.py" "${1}" "${img_dir}"
-
-# echo "$(date +"%x %X") : Pass 2 - sstv"
-# png=${img_dir}/${root_name}.2.png
-# sstv -d "${1}" -o "${png}"
+bmp=${img_dir}/${root_name}.bmp
+slowrx-cli -o "${bmp}" "${1}" 
 
 echo "$(date +"%x %X") : End $0"

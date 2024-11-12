@@ -13,6 +13,8 @@ Standing on the shoulders of giants, this project is highly indebted to the foll
 * Original project for NOAA & Meteor weather satellite image and ISS SSTV captures - [raspberry-noaa](https://github.com/reynico/raspberry-noaa)
 * SSTV Decoder #1 - [pd120_decoder](https://github.com/reynico/pd120_decoder)
 * SSTV Decoder #2 - [sstv](https://github.com/colaclanth/sstv)
+* SSTV Decoder #3 - [slowrx](https://github.com/windytan/slowrx) hacked into...
+* SSTV Decoder #4 - [slowrx-cli](https://github.com/sgarriga/slowrx-cli)
 * Turn Realtek RTL2832 USB dongle into an SDR receiver - [RTL-SDR](https://gitea.osmocom.org/sdr/rtl-sdr)
 * Bias Tee via USB - [RTL-SDR-Blog](https://github.com/rtlsdrblog/rtl-sdr-blog)
 

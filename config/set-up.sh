@@ -31,6 +31,7 @@ sudo apt install -yq python3-setuptools \
                      fonts-freefont-otf \
                      libxft-dev \
                      libxft2 \
+                     libfftw3-dev \
                      libjpeg62-turbo-dev \
                      socat \
                      sqlite3 \
@@ -155,15 +156,16 @@ else
     echo "cpp-httplib installed"
 fi
 
-if [ -e  "/usr/local/bin/sstv" ]; then
-    echo "sstv already installed"
+if [ -e  "/usr/local/bin/slowrx-cli" ]; then
+    echo "SSTV decoder already installed"
 else
-    echo "Installing sstv..."
+    echo "Installing SSTV decoder..."
     cd $HOME
-    git clone https://github.com/colaclanth/sstv.git
-    cd sstv
-    sudo python setup.py install --break-system-packages
-    echo "sstv installed"
+    git clone https://github.com/sgarriga/slowrx-cli
+    cd slowrx-cli
+    make
+    sudo cp slowrx-cli /usr/local/bin/
+    echo "SSTV decoder (slowrx-cli() installed"
 fi
 
 echo "Installs done!"
