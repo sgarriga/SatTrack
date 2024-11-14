@@ -1,11 +1,12 @@
 CREATE TABLE IF NOT EXISTS satellites(
-  name TEXT NOT NULL,
+  sat_name TEXT NOT NULL,
   freq_Mhz REAL NOT NULL,
   gain INT NOT NULL,
   signal_type TEXT,
   device INT DEFAULT 0,
   bias_tee TEXT DEFAULT "OFF",
-  sat_min_elev INT NOT NULL);
+  sat_min_elev INT NOT NULL,
+  use_calendar INT DEFAULT 0);
 CREATE TABLE IF NOT EXISTS transits(
   sat_name TEXT NOT NULL, 
   pass_start INT NOT NULL, 
@@ -17,4 +18,8 @@ CREATE TABLE IF NOT EXISTS transits(
   device INT DEFAULT 0,
   signal_type TEXT,
   status TEXT DEFAULT "initial" NOT NULL);
+CREATE TABLE IF NOT EXISTS calendar(
+  sat_name TEXT NOT NULL UNIQUE,
+  start TEXT NOT NULL,
+  end TEXT NOT NULL);
 .exit

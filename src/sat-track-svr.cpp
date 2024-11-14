@@ -14,6 +14,7 @@ static char *db = nullptr;
 static std::string image_dir = "/home/pi/SatTrack/www/img/";
 static std::string wav_dir = "/home/pi/SatTrack/www/wav/";
 static std::string utc_delta_s = "UTC";
+static bool verbose = false;
 
 // a set of routines to build an HTML table with an arbitrary number of columns
 std::string make_heading() { return ""; }
@@ -69,7 +70,7 @@ std::vector <std::string>file_list(std::string safeSatName, long passStart) {
 	auto files = Glob(wildcard);
 	wildcard = image_dir + root_name(safeSatName, passStart) + "*.bmp";
 	auto files2 = Glob(wildcard);
-        files.insert(files.end(), files2.begin(), files2.end());
+	files.insert(files.end(), files2.begin(), files2.end());
 	return files;
 }
 
@@ -84,13 +85,18 @@ const std::string utc_delta() {
 }
 
 // generate the 'edit' and 'delete' links for a satellite
-std::string sat_updt_links(std::string sat_id) {
+std::string sat_updt_links(std::string sat_id, bool calendar) {
 	std::string ret = "";
 	ret += "<a href=\"sat_edit?sat_row=" + sat_id + "\">";
 	ret += "<img class=\"icon\" src=\"./edit-icon.png\" alt=\"edit\" title=\"Modify satellite\">";
 	ret += "</a>&nbsp;&nbsp;";
 	ret += "<a href=\"sat_del?sat_row=" + sat_id + "\">";
-	ret += "<img class=\"icon\" src=\"./delete-icon.png\" alt=\"delete\" title=\"Forget Satellite\">";
+	ret += "<img class=\"icon\" src=\"./delete-icon.png\" alt=\"delete\" title=\"Forget satellite\">";
+	if (calendar) {
+		ret += "</a>&nbsp;&nbsp;";
+		ret += "<a href=\"sat_cal?sat_row=" + sat_id + "\">";
+		ret += "<img class=\"icon\" src=\"./calendar-icon.png\" alt=\"calendar\" title=\"Set dates\">";
+	}
 	ret += "</a>";
 	return ret;
 }
@@ -101,7 +107,7 @@ std::string satellites() {
 	try {
 		Connection connection = Connection(db);
 
-		Statement statement(connection, "SELECT ROWID, * FROM SATELLITES ORDER BY name");
+		Statement statement(connection, "SELECT ROWID, * FROM satellites ORDER BY sat_name");
 		table += "<table>\n";
 		table += make_header_row("Name", "Freq. (MHz)", "Gain", "Signal Type" , "Device ID", "Bias Tee", "Minimum Elevation", "Edit/Delete/Add");
 		for (Row sat : statement) {
@@ -112,7 +118,7 @@ std::string satellites() {
 					sat.GetString(5),
 					sat.GetString(6),
 					sat.GetString(7),
-					sat_updt_links(sat.GetString(0)));
+					sat_updt_links(sat.GetString(0), sat.GetInt(8) == 1));
 		}
 		table += make_row("",
 				"",
@@ -134,7 +140,7 @@ std::string satellites() {
 void sat_del(std::string sat_row_id) {
 	try {
 		Connection connection = Connection(db);
-		std::string del = std::string("DELETE FROM satellites WHERE rowid=") + sat_row_id;
+		std::string del = std::string("DELETE FROM satellites WHERE ROWID=") + sat_row_id;
 		Execute(connection, del.c_str());
 	}
 	catch (Exception const & e) {
@@ -148,7 +154,7 @@ void pass_del(std::string pass_row_id) {
 		Connection connection = Connection(db);
 
 		// delete the pass if it hasn't happened yet or isn't in progress
-		std::string del = std::string("DELETE FROM TRANSITS WHERE rowid=") + pass_row_id + " AND status!=\"complete\" AND status!=\"active\";";
+		std::string del = std::string("DELETE FROM TRANSITS WHERE ROWID=") + pass_row_id + " AND status!=\"complete\" AND status!=\"active\";";
 		Execute(connection, del.c_str());
 
 	}
@@ -156,6 +162,27 @@ void pass_del(std::string pass_row_id) {
 		printf("%s (%d)\n", e.Message.c_str(), e.Result);
 	}
 }
+
+std::string norad_name(std::string row_id) {
+	std::string sat_name = "";
+	try {
+		Connection connection = Connection(db);
+		std::string query = "SELECT sat_name FROM norad_names WHERE ROWID=" + row_id;
+		//printf("SQL %s\n", query.c_str());
+		for (Row sat : Statement(connection, query.c_str())) {
+			sat_name = sat.GetString(0);
+			if (sat_name.size()) {
+				sat_name = sat_name.substr(0, sat_name.find_last_not_of(" ")+1);
+				break; // only 1 match expected
+			}
+		}
+	}
+	catch (Exception const & e) {
+		printf("%s (%d)\n", e.Message.c_str(), e.Result);
+	}
+	return sat_name;
+}
+
 
 // save a newly created, or edited tracked satellite entry
 void sat_save(httplib::Params params) {
@@ -165,18 +192,17 @@ void sat_save(httplib::Params params) {
 
 		// saving an 'add' we have a norad_names row_id, not a name
 		if (params.find("norad_row") != params.end()) {
-			std::string name_query = "SELECT name FROM norad_names WHERE rowid=" + params.find("norad_row")->second;
-			for (Row row : Statement(connection, name_query.c_str())) {
-				sat_name =  row.GetString(0);
-				if (sat_name.size()) {
-					sat_name = sat_name.substr(0, sat_name.find_last_not_of(" ")+1);
-				}
-				break; // only 1 match expected
-			}
+			sat_name = norad_name(params.find("norad_row")->second);
+			//printf("norad_row %s = %s\n", params.find("norad_row")->second.c_str(), sat_name.c_str());
 		}
 		else {
 			sat_name = params.find("sat_name")->second;
+			//printf("norad_row %s = %s\n", "???", sat_name.c_str());
 		}
+
+		std::string use_calendar = "0";
+		if (params.find("use_calendar") != params.end())
+			use_calendar = "1";
 
 		std::string insert = std::string("INSERT INTO satellites VALUES (")
 				+ "\"" + sat_name + "\", " 
@@ -185,14 +211,37 @@ void sat_save(httplib::Params params) {
 				+ "\"" + params.find("signal")->second + "\", " 
 				+ params.find("dev")->second + ", " 
 				+ "\"" + params.find("biast")->second + "\", " 
-				+ params.find("elev")->second + ");";
+				+ params.find("elev")->second + ", "
+				+ use_calendar + ");";
+		//printf("SQL %s\n", insert.c_str());
 		Execute(connection, insert.c_str());
 
 		// if this update was from an 'edit' then purge the old row
 		if (params.find("del_sat_row") != params.end()) {
 			sat_del(params.find("del_sat_row")->second);
 		}
+	}
+	catch (Exception const & e) {
+		printf("%s (%d)\n", e.Message.c_str(), e.Result);
+	}
+}
 
+// save a satellite calendar
+void cal_save(httplib::Params params) {
+	try {
+		// start dates <= end date
+		std::string ends = params.find("ends")->second;
+		if (strcmp(params.find("start")->second.c_str(), ends.c_str()) > 0)
+			std::string ends = params.find("start")->second;
+
+		// TODO check both dates not in past
+
+		Connection connection = Connection(db);
+		std::string insert = std::string("INSERT OR REPLACE INTO calendar VALUES (")
+				+ "\"" + params.find("sat_name")->second + "\", " 
+				+ "\"" + params.find("start")->second + "\", " 
+				+ "\"" + ends + "\");" ;
+		Execute(connection, insert.c_str());
 	}
 	catch (Exception const & e) {
 		printf("%s (%d)\n", e.Message.c_str(), e.Result);
@@ -206,7 +255,7 @@ std::string sat_edit(std::string row_id) {
 		body += getTemplate("/home/pi/SatTrack/www/edit_template");
 
 		Connection connection = Connection(db);
-		std::string query = "SELECT * FROM SATELLITES WHERE rowid=" + row_id;
+		std::string query = "SELECT * FROM satellites WHERE ROWID=" + row_id;
 		for (Row sat : Statement(connection, query.c_str())) {
 			body.replace(body.find("{{ROW}}"), 7, row_id);
 			do {
@@ -221,8 +270,38 @@ std::string sat_edit(std::string row_id) {
 			tgt = std::string("\"biast\" value=\"") + sat.GetString(5) + "\"";
 			body.replace(body.find(tgt), tgt.size(), tgt + " checked");
 			body.replace(body.find("{{ELEV}}"), 8, sat.GetString(6));
+			body.replace(body.find("{{CAL}}"), 7, sat.GetInt(7) ? "checked" : "");
 			break; // only 1 match expected
 		}
+	}
+	catch (Exception const & e) {
+		printf("%s (%d)\n", e.Message.c_str(), e.Result);
+	}
+	return body;
+}
+
+std::string sat_cal(std::string sat_row) {
+	std::string body = "";
+	try {
+		body += getTemplate("/home/pi/SatTrack/www/cal_template");
+		std::string sat_name = norad_name(sat_row);
+		while (body.find("{{NAME}}") != std::string::npos)
+			body.replace(body.find("{{NAME}}"), 8, sat_name);
+
+		Connection connection = Connection(db);
+
+		std::string query = "SELECT * FROM calendar WHERE sat_name=\"" + sat_name + "\"";
+		for (Row cal : Statement(connection, query.c_str())) {
+			body.replace(body.find("{{START}}"), 9, cal.GetString(1));
+			body.replace(body.find("{{ENDS}}"), 8, cal.GetString(2));
+			break; // only 1 match expected
+		}
+
+		// there might not have been a sros, so...
+		if (body.find("{{START}}") != std::string::npos)
+			body.replace(body.find("{{START}}"), 9, "");
+		if (body.find("{{ENDS}}") != std::string::npos)
+			body.replace(body.find("{{ENDS}}"), 8, "");
 	}
 	catch (Exception const & e) {
 		printf("%s (%d)\n", e.Message.c_str(), e.Result);
@@ -236,7 +315,7 @@ std::string satellite_opts() {
 	try {
 		Connection connection = Connection(db);
 
-		Statement statement(connection, "SELECT rowid, name FROM norad_names ORDER BY name");
+		Statement statement(connection, "SELECT ROWID, sat_name FROM norad_names ORDER BY sat_name");
 		for (Row sat : statement) {
 			opts += std::string("<option value=\"") + sat.GetString(0) + "\">" + sat.GetString(1) + "</option>\n";
 		}
@@ -298,26 +377,26 @@ std::string make_safe(std::string in) {
 	std::string out = in;
 	std::replace(out.begin(), out.end(), ' ', '_');
 	std::erase(out, '(');
-			std::erase(out, '}');
+			std::erase(out, ')');
 			return out;
-			}
+}
 
-			// display the sattelite pass schedule
-			std::string passes() {
-			std::string table = "";
-			try {
-			Connection connection = Connection(db);
+// display the sattelite pass schedule
+std::string passes() {
+	std::string table = "";
+	try {
+		Connection connection = Connection(db);
 
-			Statement statement(connection, "SELECT sat_name, DATE(pass_start, 'unixepoch', 'localtime'), TIME(pass_start, 'unixepoch', 'localtime'), TIME(pass_end, 'unixepoch', 'localtime'), max_elev, direction, azimuth_at_max, device, signal_type, status, pass_start, rowid FROM TRANSITS ORDER BY pass_start DESC");
+		Statement statement(connection, "SELECT sat_name, DATE(pass_start, 'unixepoch', 'localtime'), TIME(pass_start, 'unixepoch', 'localtime'), TIME(pass_end, 'unixepoch', 'localtime'), max_elev, direction, azimuth_at_max, device, signal_type, status, pass_start, ROWID FROM TRANSITS ORDER BY pass_start DESC");
 
-			table += "<table>\n";
-			table += make_header_row("Satellite Name", "Pass Start<br>(" + utc_delta_s + ")", "Pass End<br>(" + utc_delta_s + ")", "Max.<br>Elevation" , "Image<br>Count", "");
-			std::string date = "";
-			for (Row pass : statement) {
+		table += "<table>\n";
+		table += make_header_row("Satellite Name", "Pass Start<br>(" + utc_delta_s + ")", "Pass End<br>(" + utc_delta_s + ")", "Max.<br>Elevation" , "Image<br>Count", "");
+		std::string date = "";
+		for (Row pass : statement) {
 			std::string pDate = pass.GetString(1); // date-start
 			if (pDate != date) {
-			date = pDate;
-			table += make_date_row(date);
+				date = pDate;
+				table += make_date_row(date);
 			}
 			std::string elev = std::string(pass.GetString(4)) + "&deg;";
 			std::string safeSatName = make_safe(pass.GetString(0));
@@ -355,14 +434,61 @@ std::string make_safe(std::string in) {
 								    // pass.GetString(5),          // dir
 					cnt,                        // extracted file count
 					lnk);
-			}
-			table += "</table>\n";
-			}
-			catch (Exception const & e) {
-				printf("%s (%d)\n", e.Message.c_str(), e.Result);
-			}
-			return table;
-			}
+		}
+		table += "</table>\n";
+	}
+	catch (Exception const & e) {
+		printf("%s (%d)\n", e.Message.c_str(), e.Result);
+	}
+	return table;
+}
+
+std::string dump_headers(const httplib::Headers &headers) {
+	std::string s;
+	char buf[BUFSIZ];
+
+	for (auto it = headers.begin(); it != headers.end(); ++it) {
+		const auto &x = *it;
+		snprintf(buf, sizeof(buf), "%s: %s\n", x.first.c_str(), x.second.c_str());
+		s += buf;
+	}
+
+	return s;
+}
+
+std::string log(const httplib::Request &req, const httplib::Response &res) {
+	std::string s;
+	char buf[BUFSIZ];
+
+	s += "================================\n";
+
+	snprintf(buf, sizeof(buf), "%s %s %s", req.method.c_str(), req.version.c_str(), req.path.c_str());
+	s += buf;
+
+	std::string query = "";
+	for (auto it = req.params.begin(); it != req.params.end(); ++it) {
+		const auto &x = *it;
+		snprintf(buf, sizeof(buf), "%c%s=%s", (it == req.params.begin()) ? '?' : '&', x.first.c_str(), x.second.c_str());
+		query += buf;
+	}
+	snprintf(buf, sizeof(buf), "%s\n", query.c_str());
+	s += buf;
+
+	s += dump_headers(req.headers);
+
+	s += "--------------------------------\n";
+
+	snprintf(buf, sizeof(buf), "%d %s\n", res.status, res.version.c_str());
+	s += buf;
+	s += dump_headers(res.headers);
+	s += "\n";
+
+	if (!res.body.empty()) { s += res.body; }
+
+	s += "\n";
+
+	return s;
+}
 
 int main(int argc, char *argv[])
 {
@@ -376,10 +502,14 @@ int main(int argc, char *argv[])
 					std::cout << std::string(argv[0]) << " [-p port#] [-h] database" << std::endl;
 					std::cout << "  -p port# - use port other than 8080" << std::endl;
 					std::cout << "  -h       - display usage information" << std::endl;
+					std::cout << "  -v       - display HTTP information" << std::endl;
 					exit(0);
 
 				case 'p': 
 					port = atoi(argv[++i]); // -p port#
+					break;
+				case 'v': 
+					verbose = true;
 					break;
 				default:
 					std::cout << "Option " << argv[i] << " ignored" << std::endl;
@@ -436,6 +566,11 @@ int main(int argc, char *argv[])
 			res.set_redirect("./passes");
 			});
 
+	svr.Post("/cal_save", [](const httplib::Request& req, httplib::Response& res) {
+			cal_save(req.params);
+			res.set_redirect("./satellites");
+			});
+
 	svr.Post("/sat_save", [](const httplib::Request& req, httplib::Response& res) {
 			sat_save(req.params);
 			res.set_redirect("./satellites");
@@ -452,6 +587,19 @@ int main(int argc, char *argv[])
 			res.set_redirect("./satellites");
 			}
 			});
+
+	svr.Get("/sat_cal", [](const httplib::Request& req, httplib::Response& res) {
+			if (req.params.find("sat_row") != req.params.end()) {
+			std::string form = sat_cal(req.params.find("sat_row")->second);
+			std::string body = getTemplate("/home/pi/SatTrack/www/html_template");
+			body.replace(body.find("{{}}"), 4, form);
+			res.set_content(body.c_str(), "text/html");
+			}
+			else {
+			res.set_redirect("./satellites");
+			}
+			});
+
 
 	svr.Get("/files", [](const httplib::Request& req, httplib::Response& res) {
 			std::string body = getTemplate("/home/pi/SatTrack/www/html_template");
@@ -516,6 +664,10 @@ int main(int argc, char *argv[])
 			});
 
 	// for now just ignoring unknown URLs
+	if (verbose)
+		svr.set_logger([](const httplib::Request &req, const httplib::Response &res) {
+				printf("%s", log(req, res).c_str());
+				});
 
 	svr.listen("0.0.0.0", port);
 }

@@ -79,7 +79,7 @@ done
 
 echo "$(date +"%x %X") : Building new schedule"
 # Build the new schedule in the DB for each satellite
-sqlite3 -separator , ${db} "SELECT name, signal_type FROM satellites;" > ${sat_list}
+sqlite3 -separator , ${db} "SELECT sat_name, signal_type FROM satellites;" > ${sat_list}
 while IFS=, read -r sat sig_type; do
   # Create a .tle file for just the satellite we care about
   grep "${sat}" $norad_data -A 2 > ${sat_tle}

@@ -1,7 +1,7 @@
  <form action="/sat_save" method="post" id="add_form">
   <table class="satform">
   <tr class="satform">
-  <td colspan="3" class="satform">
+  <td colspan="4" class="satform">
   <label for="norad_row">Satellite Name:</label>
   <select name="norad_row" id="norad_row" form="add_form">
     <option value="">--Please select--</option>
@@ -26,6 +26,8 @@
   <input type="number" id="elev" name="elev" min="0" max="90" value="30" step="5" style="width: 3em;"><br>
   <small>&deg; above horizon:</small>
   </td>
+  <td class="satform">
+  </tr>
   </tr>
 
   <tr class="satform">
@@ -54,9 +56,16 @@
     <label><input type="radio" name="biast" value="usb" />USB</label> 
   </fieldset>
   </td>
+  <td class="satform">
+  <fieldset>
+    <legend>Restricted Dates</legend>
+    <label><input type="checkbox" name="use_calendar" />Check Calendar</label>
+  </fieldset>
+  </td>
+  </tr>
   </tr>
   <tr class="satform">
-  <td colspan="3" class="satform" style="text-align: right;">
+  <td colspan="4" class="satform" style="text-align: right;">
   <input type="submit" value="Save" />
   </td>
   </tr>

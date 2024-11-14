@@ -3,7 +3,7 @@
   <input type="hidden" name="sat_name" value="{{NAME}}">
   <table class="satform">
   <tr class="satform">
-  <td colspan="3" class="satform">
+  <td colspan="4" class="satform">
   Satellite Name:&nbsp;{{NAME}}
   <br>
   <br>
@@ -23,6 +23,8 @@
   <label for="elev">Minimum Elevation (&deg;):</label><br>
   <input type="number" id="elev" name="elev" min="0" max="90" value="{{ELEV}}" step="5" style="width: 3em;"><br>
   <small>&deg; above horizon:</small>
+  </td>
+  <td class="satform">
   </td>
   </tr>
 
@@ -52,9 +54,16 @@
     <label><input type="radio" name="biast" value="usb" />USB</label> 
   </fieldset>
   </td>
+  <td class="satform">
+  <fieldset>
+    <legend>Restricted Dates</legend>
+    <label><input type="checkbox" name="use_calendar" {{CAL}} />Check Calendar</label> 
+  </fieldset>
+  </td>
   </tr>
+
   <tr class="satform">
-  <td colspan="3" class="satform" style="text-align: right;">
+  <td colspan="4" class="satform" style="text-align: right;">
   <input type="submit" value="Save" />
   </td>
   </tr>

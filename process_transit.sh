@@ -33,7 +33,7 @@ duration=$(($pass_end - $pass_start))
 
 # Get satellite details from DB into a variable
 set -f
-sql="SELECT * FROM satellites WHERE name=\"${1}\" AND signal_type=\"${sig_type}\";"
+sql="SELECT * FROM satellites WHERE sat_name=\"${1}\" AND signal_type=\"${sig_type}\";"
 sat_row=$(sqlite3 -separator , ${db} "${sql}")
 set +f
 if [ -z "${sat_row}" ]; then

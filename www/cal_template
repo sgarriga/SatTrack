@@ -1,0 +1,28 @@
+<form action="/cal_save" method="post" id="add_form">
+  <table class="satform">
+    <tr class="satform">
+      <td class="satform">
+        Tracking dates for {{NAME}}
+      </td>
+      <td class="satform">
+        <input type="hidden" name="sat_name" value="{{NAME}}">
+      </td>
+      <td class="satform">
+      
+      </td>
+    </tr>
+    <tr class="satform">
+      <td class="satform">
+        <label for="start">Start Date UTC</label><br>
+        <input type="date" id="start" name="start" value="{{START}}">
+      </td>
+      <td class="satform">
+        <label for="start">End Date UTC</label><br>
+        <input type="date" id="ends" name="ends" value="{{ENDS}}">
+      </td>
+      <td class="satform" style="text-align: right;">
+        <input type="submit" value="Save" />
+      </td>
+    </tr>
+  </table>
+</form> 
