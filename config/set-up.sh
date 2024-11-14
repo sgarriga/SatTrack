@@ -136,17 +136,6 @@ else
     echo "medet_arm installed"
 fi
 
-if [ -d "$HOME/pd120_decoder" ]; then
-    echo "pd120_decoder already installed"
-else
-    echo "Installing pd120_decoder..."
-    cd $HOME
-    git clone https://github.com/reynico/pd120_decoder.git
-    cd pd120_decoder/pd120_decoder
-    python3 -m pip install --user -r requirements.txt
-    echo "pd120_decoder installed"
-fi
-
 if [ -d "$HOME/cpp-httplib" ]; then
     echo "cpp-httplib already installed"
 else

@@ -27,9 +27,17 @@ echo "$(date +"%x %X") : Start $0 $1 $2 $3 $4 $5"
 # Get full satellite details from DB
 ## set -f/+f avoids * expansion
 set -f
-IFS=, read -r sat_name freq gain sig_type dev_id bias_tee sat_min <<< $(sqlite3 -separator , ${db} "select * from satellites where sat_name=\"${sat_name}\" AND signal_type=\"${sig_type}\";")
+IFS=, read -r sat_name freq gain sig_type dev_id bias_tee sat_min cal <<< $(sqlite3 -separator , ${db} "select * from satellites where sat_name=\"${sat_name}\" AND signal_type=\"${sig_type}\";")
 unset IFS
 set +f
+
+if [ $cal -ne 0 ]; then
+    ${cmd_path}/check_cal.sh ${sat_name} ${start_s} ${end_s}
+    if [ $? -ne 0 ]; then
+        echo "$(date +"%x %X") : Done $0"
+        exit
+    fi
+fi;
 
 # Check for any special restrictions
 safe_sat=$(echo ${1/ /_} | tr -d '()')

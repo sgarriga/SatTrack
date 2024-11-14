@@ -42,7 +42,7 @@ if [ -z "${sat_row}" ]; then
 fi
 
 # split the variable 
-IFS=, read -r sat_name freq gain sig_type dev_id bias_tee sun_min sat_min <<< "${sat_row}"
+IFS=, read -r sat_name freq gain sig_type dev_id bias_tee sun_min sat_min cal <<< "${sat_row}"
 unset IFS
 
 # mark pass active
