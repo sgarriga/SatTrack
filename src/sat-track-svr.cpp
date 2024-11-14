@@ -163,14 +163,13 @@ void pass_del(std::string pass_row_id) {
 	}
 }
 
-std::string norad_name(std::string row_id) {
+std::string norad_name(std::string norad_row_id) {
 	std::string sat_name = "";
 	try {
 		Connection connection = Connection(db);
-		std::string query = "SELECT sat_name FROM norad_names WHERE ROWID=" + row_id;
-		//printf("SQL %s\n", query.c_str());
-		for (Row sat : Statement(connection, query.c_str())) {
-			sat_name = sat.GetString(0);
+		std::string query = "SELECT sat_name FROM norad_names WHERE ROWID=" + norad_row_id;
+		for (Row nor : Statement(connection, query.c_str())) {
+			sat_name = nor.GetString(0);
 			if (sat_name.size()) {
 				sat_name = sat_name.substr(0, sat_name.find_last_not_of(" ")+1);
 				break; // only 1 match expected
@@ -249,15 +248,15 @@ void cal_save(httplib::Params params) {
 }
 
 // present the 'edit' for for a tracked satellite
-std::string sat_edit(std::string row_id) {
+std::string sat_edit(std::string sat_row_id) {
 	std::string body = "";
 	try {
 		body += getTemplate("/home/pi/SatTrack/www/edit_template");
 
 		Connection connection = Connection(db);
-		std::string query = "SELECT * FROM satellites WHERE ROWID=" + row_id;
+		std::string query = "SELECT * FROM satellites WHERE ROWID=" + sat_row_id;
 		for (Row sat : Statement(connection, query.c_str())) {
-			body.replace(body.find("{{ROW}}"), 7, row_id);
+			body.replace(body.find("{{ROW}}"), 7, sat_row_id);
 			do {
 				body.replace(body.find("{{NAME}}"), 8, sat.GetString(0));
 			} while (body.find("{{NAME}}") != std::string::npos);
@@ -283,12 +282,17 @@ std::string sat_edit(std::string row_id) {
 std::string sat_cal(std::string sat_row) {
 	std::string body = "";
 	try {
+		Connection connection = Connection(db);
+
 		body += getTemplate("/home/pi/SatTrack/www/cal_template");
-		std::string sat_name = norad_name(sat_row);
+		std::string sat_name = "";
+		std::string queryN = "SELECT sat_name FROM satellites WHERE ROWID=" + sat_row;
+		for (Row sat : Statement(connection, queryN.c_str())) {
+			sat_name = sat.GetString(0);
+			break; // only 1 match expected
+		}
 		while (body.find("{{NAME}}") != std::string::npos)
 			body.replace(body.find("{{NAME}}"), 8, sat_name);
-
-		Connection connection = Connection(db);
 
 		std::string query = "SELECT * FROM calendar WHERE sat_name=\"" + sat_name + "\"";
 		for (Row cal : Statement(connection, query.c_str())) {
@@ -297,7 +301,7 @@ std::string sat_cal(std::string sat_row) {
 			break; // only 1 match expected
 		}
 
-		// there might not have been a sros, so...
+		// there might not have been a row, so...
 		if (body.find("{{START}}") != std::string::npos)
 			body.replace(body.find("{{START}}"), 9, "");
 		if (body.find("{{ENDS}}") != std::string::npos)
