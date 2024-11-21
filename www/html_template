@@ -34,6 +34,9 @@
     <td class="topnav" style="text-align: left;">
       <a href="./passes"><img class="topnav" src="./schedule_lg_icon.png" alt="schedule" title="View Schedule"></a>
     </td>
+    <td class="topnav">
+      <img class="hdr_img" src="./SatTrack_hdr.png">
+    </td>
     <td class="topnav" style="text-align: right;">
       <a href="./satellites"><img class="topnav" src="./satellite_lg_icon.png" alt="satellites" title="Add/Delete Satellites"></a>
     </td>
