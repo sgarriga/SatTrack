@@ -32,7 +32,7 @@ unset IFS
 set +f
 
 if [ $cal -ne 0 ]; then
-    ${cmd_path}/check_cal.sh ${sat_name} ${start_s} ${end_s}
+    ${cmd_path}/check_cal.sh "${sat_name}" ${start_s} ${end_s}
     if [ $? -ne 0 ]; then
         echo "$(date +"%x %X") : Done $0"
         exit
