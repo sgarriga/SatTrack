@@ -189,15 +189,23 @@ void sat_save(httplib::Params params) {
 		Connection connection = Connection(db);
 		std::string sat_name = "";
 
-		// saving an 'add' we have a norad_names row_id, not a name
+		// saving an 'add' we have a norad_names row_id (or a catalog number), not a name
 		if (params.find("norad_row") != params.end()) {
-			sat_name = norad_name(params.find("norad_row")->second);
-			//printf("norad_row %s = %s\n", params.find("norad_row")->second.c_str(), sat_name.c_str());
+                        if (!params.find("norad_row")->second.empty()) {
+				sat_name = norad_name(params.find("norad_row")->second);
+                        }
+                        else if (!params.find("norad_cat")->second.empty()) {
+				sat_name = "#" + params.find("norad_cat")->second;
+			}
 		}
-		else {
+                else if (!params.find("sat_name")->second.empty()) {
 			sat_name = params.find("sat_name")->second;
-			//printf("norad_row %s = %s\n", "???", sat_name.c_str());
 		}
+
+                // if we still don't have a name, give up!
+                if (!sat_name.size()) {
+                    return;
+                }
 
 		std::string use_calendar = "0";
 		if (params.find("use_calendar") != params.end())

@@ -40,23 +40,23 @@ if [ $cal -ne 0 ]; then
 fi;
 
 # Check for any special restrictions
-safe_sat=$(echo ${1/ /_} | tr -d '()')
+safe_sat=$(echo ${1} | tr ' ' '_' | tr -d '()')
 sat_script=${cmd_path}/${safe_sat}_special.sh
-if [ -x ${sat_script} ]; then
+if [ -x "${sat_script}" ]; then
     ${sat_script} ${start_s} ${end_s} ${sig_type}
     if [ $? -ne 0 ]; then
         echo "$(date +"%x %X") : Done $0"
         exit
     fi
-#else
-#    echo "$(date +"%x %X") : No ${sat_script} found"
+# else
+    # echo "$(date +"%x %X") : No ${sat_script} found"
 fi
 
 # come up with prediction start/end timings for pass
 ## drop every predicted point below our minimum elevation and
 ## determine start & end of passes (and some other info)
 transits=/tmp/transits.txt
-predict -t $tle_file -q ${cmd_path}/config/predict.qth -f "${sat_name}" "${start_s}" "${end_s}" | \
+timeout 30s predict -t $tle_file -q ${cmd_path}/config/predict.qth -f "${sat_name}" "${start_s}" "${end_s}" | \
   awk -v min="${sat_min}" '{if($5>=min){print $0}}' | \
   awk -f  ${cmd_path}/predicts2pass.awk > ${transits}
 if [ ! -s ${transits} ]; then
@@ -80,6 +80,10 @@ while read -r start stop max_el init_az max_az; do
 
     time1=$(date -d @${start} +"%Y/%m/%d %H:%M:%S UTC")
     time2=$(date -d @${stop} +"%Y/%m/%d %H:%M:%S UTC")
+    if [[ $time1 == "1969/12/31"* ]]; then
+        echo "$(date +"%x %X") : Skipping bad time ${sat_name} ${time1} - ${time2}"
+        continue
+    fi
     echo "$(date +"%x %X") : Scheduling capture for: ${sat_name} ${time1} - ${time2}"
 
     sql="INSERT OR REPLACE INTO transits (sat_name, pass_start, pass_end, max_elev, pass_start_azimuth, direction, azimuth_at_max, device, signal_type) VALUES (\"${sat_name}\", ${start}, ${stop}, ${max_el}, ${init_az}, \"${dir}\", ${max_az}, ${dev_id}, \"${sig_type}\");"

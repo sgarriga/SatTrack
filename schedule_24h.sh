@@ -81,8 +81,19 @@ echo "$(date +"%x %X") : Building new schedule"
 # Build the new schedule in the DB for each satellite
 sqlite3 -separator , ${db} "SELECT sat_name, signal_type FROM satellites;" > ${sat_list}
 while IFS=, read -r sat sig_type; do
-  # Create a .tle file for just the satellite we care about
-  grep "${sat}" $norad_data -A 2 > ${sat_tle}
+  # Check if it's a name or a catalog number
+  no=${sat:0:1}
+  if [[ "$no" == "#" ]]; then
+    # pull the .tle data for the catalog number
+    cat_no=${sat:1:5}
+    echo "$(date +"%x %X") : Scheduling Catalog ${cat_no}"
+    wget -q "http://celestrak.org/NORAD/elements/gp.php?CATNR=$cat_no"  --no-check-certificate -O - >  ${sat_tle}
+    # sat=$(head -n 1 ${sat_tle})
+  else
+    # Create a .tle file for just the satellite we care about
+    echo "$(date +"%x %X") : Scheduling Name ${sat}"
+    grep "${sat}" $norad_data -A 2 > ${sat_tle}
+  fi
 
   if [ -s ${sat_tle} ]; then
     # Schedule the next 24 hours of passes 
@@ -104,12 +115,13 @@ fi
 rm -f ${conflicts}
 
 echo "$(date +"%x %X") : Apply new schedule"
+ts=`date +"%Y-%m-%d"`
 # Now conficts are resolved, schedule the passes of interest
 transits=/tmp/transits.txt
 sqlite3 -separator , ${db} "SELECT sat_name, pass_start FROM transits WHERE status=\"initial\";" > ${transits}
 while IFS=, read -r name start; do
   # Schedule each pass using 'at'
-  echo "${cmd_path}/process_transit.sh \"${name}\" ${start} >> ${cmd_path}/process_transit.log 2>&1" | at -t $(date -d @${start} +"%Y%m%d%H%M")
+  echo "${cmd_path}/process_transit.sh \"${name}\" ${start} >> ${cmd_path}/process_transit.${ts}.log 2>&1" | at -t $(date -d @${start} +"%Y%m%d%H%M")
   echo "$(date +"%x %X") : Scheduled \"${name}\" at $(date -d @${start} +"%x %X")"
   #
 done < ${transits}

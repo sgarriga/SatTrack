@@ -2,9 +2,9 @@
 PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin
 #
 # Midnight schedule run
-0 0 * * * /home/pi/SatTrack/schedule_24h.sh >> /home/pi/SatTrack/schedule.log 2>&1
-@reboot   /home/pi/SatTrack/schedule_24h.sh >> /home/pi/SatTrack/schedule.log 2>&1
-@reboot   /home/pi/SatTrack/sat-track-svr /home/pi/SatTrack/sat-track.db >> /home/pi/SatTrack/svr.log 2>&1 &
+0 0 * * * /home/pi/SatTrack/schedule_24h.sh >> /home/pi/SatTrack/schedule."$(date +\%Y-\%m-\%d).log" 2>&1
+@reboot   /home/pi/SatTrack/schedule_24h.sh >> /home/pi/SatTrack/schedule."$(date +\%Y-\%m-\%d).log" 2>&1
+@reboot   /home/pi/SatTrack/sat-track-svr /home/pi/SatTrack/sat-track.db >> /home/pi/SatTrack/svr."$(date +\%Y-\%m-\%d).log" 2>&1 &
 #
 # After midnight clean-up
-5 0 * * * /home/pi/SatTrack/cleanup.sh  >> /home/pi/SatTrack/cleanup.log 2>&1
+5 0 * * * /home/pi/SatTrack/cleanup.sh  >> /home/pi/SatTrack/cleanup."$(date +\%Y-\%m-\%d).log" 2>&1

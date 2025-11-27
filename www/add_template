@@ -1,13 +1,18 @@
  <form action="/sat_save" method="post" id="add_form">
   <table class="satform">
   <tr class="satform">
-  <td colspan="4" class="satform">
+  <td colspan="2" class="satform">
   <label for="norad_row">Satellite Name:</label>
   <select name="norad_row" id="norad_row" form="add_form">
     <option value="">--Please select--</option>
     {{}}
   </select><br>
   <small>(NORAD element)</small>
+  <br>
+  </td>
+  <td colspan="2" class="satform">
+  <label for="norad_cat"><b>or</b> NORAD Catalog Number:</label>
+  <input type="text" id="cat" name="norad_cat" value="" style="width: 8em;">
   <br>
   </td>
   </tr>
