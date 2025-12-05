@@ -28,7 +28,7 @@ IFS=, read -r sat_name pass_start pass_end max_elev pass_start_azimuth direction
 unset IFS
 
 timestamp=$(TZ=UTC printf '%(%Y%m%d%H%M%S)T' $pass_start)
-outfile=$(echo ${sat_name/ /_}-${timestamp} | tr -d "()")
+outfile=$(echo ${sat_name// /_}-${timestamp} | tr -d "()")
 duration=$(($pass_end - $pass_start))
 
 # Get satellite details from DB into a variable

@@ -40,7 +40,7 @@ if [ $cal -ne 0 ]; then
 fi;
 
 # Check for any special restrictions
-safe_sat=$(echo ${1} | tr ' ' '_' | tr -d '()')
+safe_sat=$(echo ${1// /_} | tr -d '()')
 sat_script=${cmd_path}/${safe_sat}_special.sh
 if [ -x "${sat_script}" ]; then
     ${sat_script} ${start_s} ${end_s} ${sig_type}
